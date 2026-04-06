@@ -1,0 +1,43 @@
+{
+  "name": "BarTracKE — Bar Management System",
+  "short_name": "BarTracKE",
+  "description": "Complete bar and stock management system for Kenyan bars and restaurants.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1b3e",
+  "theme_color": "#c9962a",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-KE",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Open the management dashboard",
+      "url": "/",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "New Order",
+      "short_name": "Order",
+      "description": "Place a new order",
+      "url": "/",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
