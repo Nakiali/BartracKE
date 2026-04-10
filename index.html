@@ -1,0 +1,3638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#c9962a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BarTracKE">
+<meta name="description" content="Complete bar and stock management system for Kenyan bars and restaurants.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>BarTracKE — Complete Bar Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+:root {
+  /* ── Corporate Navy + Gold palette ── */
+  --bg:       #f0f2f7;
+  --surface:  #ffffff;
+  --surface2: #f7f8fc;
+  --surface3: #eef0f8;
+  --border:   #dde1ee;
+  --border2:  #c8cfe8;
+
+  --navy:     #0d1b3e;
+  --navy2:    #162650;
+  --navy3:    #1e3264;
+  --navy-light: #253d7a;
+
+  --gold:     #c9962a;
+  --gold2:    #e8b432;
+  --gold3:    #fff3d6;
+
+  --green:    #0f9e5e;
+  --green-bg: #e8f8f1;
+  --red:      #d63c3c;
+  --red-bg:   #fdf0f0;
+  --blue:     #1a5fd4;
+  --blue-bg:  #edf3ff;
+  --teal:     #0b8f7f;
+  --teal-bg:  #e8f7f5;
+  --purple:   #6b3fcb;
+
+  --text:       #0d1b3e;
+  --text-muted: #5a6b8a;
+  --text-dim:   #9ba8c2;
+  --text-inv:   #ffffff;
+
+  --r: 10px;
+  --r-lg: 16px;
+
+  --shadow-sm: 0 1px 4px rgba(13,27,62,0.07);
+  --shadow:    0 4px 16px rgba(13,27,62,0.10);
+  --shadow-lg: 0 12px 40px rgba(13,27,62,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+
+/* ══════════════════════ SPLASH ══════════════════════ */
+#splashScreen{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(145deg,#091228 0%,#0d1b3e 45%,#162650 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  overflow-y:auto;
+  padding:24px 0;
+}
+.splash-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 30%,rgba(201,150,42,0.12) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 40% at 85% 75%,rgba(26,95,212,0.10) 0%,transparent 50%),
+    radial-gradient(ellipse 40% 30% at 50% 10%,rgba(255,255,255,0.03) 0%,transparent 40%);
+}
+.splash-grid{
+  position:absolute;inset:0;opacity:0.06;
+  background-image:linear-gradient(rgba(255,255,255,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.15) 1px,transparent 1px);
+  background-size:48px 48px;
+}
+.splash-brand{text-align:center;position:relative;z-index:2;margin-bottom:24px;}
+.splash-icon{
+  width:80px;height:80px;border-radius:20px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:38px;margin:0 auto 20px;
+  box-shadow:0 20px 60px rgba(212,168,67,0.3);
+  animation:splashFloat 3s ease-in-out infinite;
+}
+@keyframes splashFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+.splash-title{
+  font-family:'Playfair Display',serif;font-size:52px;font-weight:900;
+  letter-spacing:-1px;
+  background:linear-gradient(135deg,#f0c84a,#e8a820,#c9962a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.splash-sub{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-top:6px;}
+
+.auth-container{
+  position:relative;z-index:2;
+  background:#ffffff;
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:20px;
+  width:min(500px,94vw);
+  overflow:visible;
+  box-shadow:0 32px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06);
+}
+.auth-tabs{display:flex;border-bottom:1px solid #e8ecf6;background:#f7f9fe;}
+.auth-tab{
+  flex:1;padding:14px;text-align:center;cursor:pointer;
+  font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:#7a8aaa;transition:all 0.2s;border:none;background:none;
+}
+.auth-tab.active{color:var(--navy);background:#fff;border-bottom:2px solid var(--gold);margin-bottom:-1px;}
+.auth-body{padding:28px;}
+.auth-panel{display:none;}
+.auth-panel.active{display:block;}
+
+
+.f-group{margin-bottom:18px;}
+.f-input, .f-select{
+  width:100%;background:#f7f9fe;border:1.5px solid #dde3f2;border-radius:var(--r);
+  padding:11px 15px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s,background 0.2s;appearance:none;
+}
+.f-input:focus,.f-select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,27,62,0.08);background:#fff;}
+.f-input::placeholder{color:#aab2c8;}
+.f-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;display:block;font-weight:700;}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:11px 22px;border-radius:var(--r);font-family:'Outfit',sans-serif;
+  font-weight:700;font-size:12px;cursor:pointer;border:none;transition:all 0.18s;
+  letter-spacing:0.8px;text-transform:uppercase;white-space:nowrap;
+}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;width:100%;box-shadow:0 4px 14px rgba(201,150,42,0.3);}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,150,42,0.4);}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--border2);}
+.btn-ghost:hover{border-color:var(--navy);color:var(--navy);background:var(--surface3);}
+.btn-success{background:var(--green);color:#fff;box-shadow:0 4px 12px rgba(15,158,94,0.25);}
+.btn-success:hover{filter:brightness(1.08);}
+.btn-danger{background:var(--red);color:#fff;box-shadow:0 4px 12px rgba(214,60,60,0.25);}
+.btn-danger:hover{filter:brightness(1.08);}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-teal{background:var(--teal);color:#fff;}
+.btn-navy{background:var(--navy);color:#fff;}
+.btn-sm{padding:7px 14px;font-size:11px;}
+.btn-xs{padding:4px 10px;font-size:10px;}
+.btn-icon{padding:8px;border-radius:8px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+
+.demo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px;}
+.demo-chip{
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;
+}
+.demo-chip:hover{border-color:var(--gold);background:rgba(212,168,67,0.05);}
+.demo-chip .dc-icon{font-size:22px;display:block;margin-bottom:4px;}
+.demo-chip .dc-name{font-size:10px;color:var(--text-muted);}
+.demo-chip .dc-role{font-size:9px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;}
+
+/* ══════════════════════ APP SHELL ══════════════════════ */
+#appShell{display:none;min-height:100vh;flex-direction:column;}
+
+.topbar{
+  height:60px;background:var(--navy);border-bottom:none;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 12px rgba(13,27,62,0.25);
+}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+.topbar-logo{
+  font-family:'Playfair Display',serif;font-size:20px;font-weight:900;
+  background:linear-gradient(135deg,#f5c842,#e8a820);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.branch-selector{
+  background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);border-radius:8px;
+  padding:5px 12px;font-size:12px;color:rgba(255,255,255,0.75);cursor:pointer;
+  display:flex;align-items:center;gap:6px;
+}
+.branch-selector select{
+  background:transparent;border:none;color:#fff;font-family:'Outfit',sans-serif;
+  font-size:12px;outline:none;cursor:pointer;
+}
+.branch-selector select option{color:var(--navy);background:#fff;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);border-radius:20px;
+  padding:5px 12px 5px 5px;
+}
+.user-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;
+}
+.user-name{font-size:12px;font-weight:600;color:#fff;}
+.user-role-tag{font-size:10px;color:rgba(255,255,255,0.6);}
+.shift-badge{
+  background:rgba(15,158,94,0.2);border:1px solid rgba(15,158,94,0.4);
+  border-radius:20px;padding:4px 12px;font-size:11px;color:#4de8a0;
+  display:flex;align-items:center;gap:5px;
+}
+.shift-badge.off{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);}
+.menu-toggle{display:none;background:none;border:none;color:rgba(255,255,255,0.8);font-size:22px;cursor:pointer;}
+.notif-btn{position:relative;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:16px;}
+.notif-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+.layout{display:flex;min-height:calc(100vh - 58px);}
+
+/* ══════════════════════ SIDEBAR ══════════════════════ */
+.sidebar{
+  width:230px;background:var(--navy);border-right:none;
+  padding:16px 0;flex-shrink:0;overflow-y:auto;
+  transition:transform 0.3s;
+  box-shadow:2px 0 16px rgba(13,27,62,0.15);
+}
+.sidebar-section{padding:0 12px;margin-bottom:4px;}
+.sidebar-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:10px 8px 5px;font-weight:700;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;
+  cursor:pointer;font-size:13px;color:rgba(255,255,255,0.55);transition:all 0.15s;
+  margin-bottom:2px;position:relative;font-weight:500;
+}
+.nav-item:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+.nav-item.active{background:linear-gradient(90deg,rgba(201,150,42,0.25),rgba(201,150,42,0.08));color:#f5c842;}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:22px;background:var(--gold2);border-radius:0 3px 3px 0;}
+.nav-icon{font-size:15px;width:22px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;}
+.nav-badge.gold{background:var(--gold);color:#fff;}
+
+/* ══════════════════════ CONTENT ══════════════════════ */
+.content{flex:1;padding:28px;overflow-y:auto;max-width:1320px;}
+.page{display:none;}
+.page.active{display:block;animation:pageIn 0.25s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.page-hdr-left h1{font-size:26px;font-weight:900;letter-spacing:-0.5px;color:var(--navy);}
+.page-hdr-left p{color:var(--text-muted);font-size:13px;margin-top:3px;}
+
+/* ══════════════════════ STATS ══════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px;}
+.stat{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;transition:transform 0.2s;box-shadow:var(--shadow-sm);}
+.stat:hover{transform:translateY(-2px);}
+.stat.clickable{cursor:pointer;position:relative;transition:transform 0.18s,box-shadow 0.18s;}
+.stat.clickable:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(212,168,67,0.18);}
+.stat.clickable::after{content:"↗";position:absolute;top:10px;right:12px;font-size:13px;color:var(--text-dim);transition:color 0.2s,transform 0.2s;}
+.stat.clickable:hover::after{color:var(--gold);transform:translate(2px,-2px);}
+.stat-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;font-weight:700;}
+.stat-val{font-size:28px;font-weight:900;color:var(--navy);}
+.stat-sub{font-size:11px;margin-top:4px;}
+.stat.gold{border-left:4px solid var(--gold);background:linear-gradient(135deg,#fffbf0,#fff);}
+.stat.green{border-left:3px solid var(--green);background:linear-gradient(135deg,#f0faf5,#fff);}
+.stat.red{border-left:3px solid var(--red);background:linear-gradient(135deg,#fdf5f5,#fff);}
+.stat.blue{border-left:3px solid var(--blue);background:linear-gradient(135deg,#f0f5ff,#fff);}
+.stat.teal{border-left:3px solid var(--teal);background:linear-gradient(135deg,#f0faf8,#fff);}
+
+/* ══════════════════════ CARD ══════════════════════ */
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:22px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.card-title{font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-0.2px;}
+.card-sub{font-size:12px;color:var(--text-muted);margin-top:2px;}
+
+/* ══════════════════════ TABLE ══════════════════════ */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r);border:1.5px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:10px 14px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);border-bottom:2px solid var(--border);font-weight:800;background:var(--surface3);text-align:left;}
+td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#f7f9fe;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}
+.badge-green{background:#e8f8f1;color:#0a7a4a;border:1px solid #b8e8d4;}
+.badge-red{background:#fdf0f0;color:#b02020;border:1px solid #f0c0c0;}
+.badge-gold{background:#fff8e8;color:#9a6e10;border:1px solid #e8d090;}
+.badge-blue{background:#edf3ff;color:#1245a0;border:1px solid #b8ccf0;}
+.badge-teal{background:#e8f7f5;color:#087060;border:1px solid #a8dcd5;}
+.badge-purple{background:#f3eeff;color:#5020a0;border:1px solid #c8a8f0;}
+.badge-gray{background:#f0f2f8;color:#5a6b8a;border:1px solid #d0d8ec;}
+
+/* ══════════════════════ FORM ══════════════════════ */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media(max-width:640px){.form-grid,.form-grid-3{grid-template-columns:1fr;}}
+.f-row2{margin-bottom:16px;}
+
+/* ══════════════════════ ORDER CARDS ══════════════════════ */
+.orders-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.order-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px;transition:border-color 0.2s,transform 0.2s;box-shadow:var(--shadow-sm);
+}
+.order-card:hover{transform:translateY(-2px);}
+.order-card.pending{border-left:3px solid var(--gold);}
+.order-card.dispatched{border-left:3px solid var(--blue);}
+.order-card.paid{border-left:3px solid var(--green);opacity:0.8;}
+.order-card.cancelled{border-left:3px solid var(--red);opacity:0.6;}
+.oc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.oc-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#9a6e10;}
+.oc-meta{font-size:11px;color:var(--text-muted);margin-bottom:8px;}
+.oc-items{list-style:none;margin:8px 0;}
+.oc-items li{display:flex;justify-content:space-between;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.oc-items li:last-child{border:none;}
+.oc-total{font-size:22px;font-weight:900;color:#9a6e10;margin:8px 0 12px;}
+.oc-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* ══════════════════════ ALERT ══════════════════════ */
+.alert{padding:12px 16px;border-radius:var(--r);font-size:13px;margin-bottom:16px;display:none;}
+.alert.show{display:block;animation:alertIn 0.3s ease;}
+@keyframes alertIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.alert-ok{background:#e8f8f1;border:1px solid #a8dcc8;color:#0a6a40;}
+.alert-err{background:#fdf0f0;border:1px solid #f0b8b8;color:#a01818;}
+.alert-info{background:#fff8e8;border:1px solid #e8d080;color:#7a5008;}
+
+/* ══════════════════════ MODAL ══════════════════════ */
+.modal-ov{position:fixed;inset:0;background:rgba(13,27,62,0.55);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-ov.open{display:flex;}
+.modal{background:#fff;border:1px solid var(--border);border-radius:20px;padding:28px;width:min(540px,100%);max-height:90vh;overflow-y:auto;animation:modalIn 0.3s ease;box-shadow:var(--shadow-lg);}
+@keyframes modalIn{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+.modal-close{background:var(--surface3);border:1px solid var(--border);color:var(--text-muted);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+
+/* ══════════════════════ RECEIPT ══════════════════════ */
+.receipt{
+  font-family:'JetBrains Mono',monospace;
+  background:#fff;border-radius:12px;
+  padding:24px 22px;max-width:360px;margin:0 auto;
+  border:1.5px dashed var(--border2);
+}
+.receipt-logo{text-align:center;margin-bottom:4px;}
+.receipt-logo-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,#f0c84a,#c9962a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.receipt-logo-sub{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-top:2px;}
+.receipt-divider{border:none;border-top:1.5px dashed var(--border2);margin:12px 0;}
+.receipt-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:var(--text);}
+.receipt-row.header{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);}
+.receipt-row.total{font-size:16px;font-weight:900;color:#9a6e10;padding:6px 0;}
+.receipt-row.muted{color:var(--text-muted);font-size:11px;}
+.receipt-status{text-align:center;margin:10px 0;}
+.receipt-footer{text-align:center;font-size:10px;color:var(--text-dim);letter-spacing:1px;margin-top:10px;}
+@media print{
+  body > *:not(#receiptPrintArea){display:none!important;}
+  #receiptPrintArea{display:block!important;position:fixed;inset:0;z-index:9999;background:#fff;padding:32px;}
+  .receipt{border:none;max-width:100%;box-shadow:none;}
+  .no-print{display:none!important;}
+}
+
+/* ══════════════════════ PROGRESS ══════════════════════ */
+.prog-wrap{margin:10px 0;}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:5px;font-weight:600;}
+.prog-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.5s;}
+.prog-green{background:var(--green);}
+.prog-gold{background:var(--gold);}
+.prog-red{background:var(--red);}
+
+/* ══════════════════════ CHAIN VIZ ══════════════════════ */
+.chain{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin-bottom:20px;}
+.chain-step{
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;text-align:center;min-width:80px;
+}
+.cs-icon{font-size:22px;}
+.cs-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-top:3px;}
+.chain-arrow{color:#9a6e10;font-size:18px;padding:0 6px;}
+
+/* ══════════════════════ SHIFT PANEL ══════════════════════ */
+.shift-panel{
+  background:linear-gradient(135deg,var(--navy),var(--navy2));
+  border:none;border-radius:var(--r-lg);padding:22px;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  box-shadow:var(--shadow);
+}
+.shift-panel .shift-timer{color:#f5c842;}
+.shift-panel .fs-11,.shift-panel .text-muted{color:rgba(255,255,255,0.6)!important;}
+.shift-info{display:flex;align-items:center;gap:12px;}
+.shift-timer{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;color:#f5c842;}
+
+/* ══════════════════════ RESPONSIVE ══════════════════════ */
+@media(max-width:768px){
+  .menu-toggle{display:block;}
+  .sidebar{position:fixed;top:58px;left:0;bottom:0;z-index:100;transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .content{padding:14px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .topbar-right .shift-badge,.topbar-right .branch-selector{display:none;}
+  .page-hdr{flex-direction:column;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr;}
+  .f-row{grid-template-columns:1fr;}
+}
+
+/* ══════════════════════ MISC ══════════════════════ */
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.sep{margin:0 8px;color:var(--text-dim);}
+.text-muted{color:var(--text-muted);}
+.text-dim{color:var(--text-dim);}
+.text-green{color:var(--green);}
+.text-red{color:var(--red);}
+.text-gold{color:#9a6e10;}
+.text-blue{color:var(--blue);}
+.flex{display:flex;}
+.flex-wrap{flex-wrap:wrap;}
+.gap-8{gap:8px;}
+.gap-12{gap:12px;}
+.items-center{align-items:center;}
+.justify-between{justify-content:space-between;}
+.mt-8{margin-top:8px;}
+.mt-16{margin-top:16px;}
+.mb-16{margin-bottom:16px;}
+.w-full{width:100%;}
+.fw-bold{font-weight:700;}
+.fs-12{font-size:12px;}
+.fs-11{font-size:11px;}
+.notice{background:#fff8e8;border:1px solid #e8d080;border-radius:var(--r);padding:14px 16px;font-size:13px;color:#7a5008;}
+
+/* ══════════════════════ STAFF CARDS ══════════════════════ */
+.staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:4px;}
+.staff-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:18px 16px;cursor:pointer;transition:transform 0.18s,box-shadow 0.18s,border-color 0.18s;
+  box-shadow:var(--shadow-sm);position:relative;overflow:hidden;
+}
+.staff-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(13,27,62,0.13);border-color:var(--border2);}
+.staff-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--navy3));}
+.staff-card.role-owner::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.staff-card.role-manager::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.staff-card.role-counter::before{background:linear-gradient(90deg,var(--teal),#0dcfb8);}
+.staff-card.role-waiter::before{background:linear-gradient(90deg,var(--blue),#4a8fe8);}
+.sc-avatar{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--navy2),var(--navy3));
+  display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;
+  color:#fff;margin-bottom:12px;
+}
+.sc-name{font-size:14px;font-weight:800;color:var(--navy);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-role{margin-bottom:8px;}
+.sc-meta{font-size:11px;color:var(--text-muted);margin-bottom:3px;display:flex;align-items:center;gap:5px;}
+.sc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);}
+.sc-actions{display:flex;gap:5px;}
+.sc-hint{font-size:10px;color:var(--text-dim);letter-spacing:0.5px;}
+
+/* ══════════════════════ BRANCH CARDS ENHANCED ══════════════════════ */
+.branch-card{position:relative;overflow:hidden;}
+.branch-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--navy),var(--navy3));}
+.branch-card .bc-icon{
+  width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--navy),var(--navy2));
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--                       SPLASH / AUTH                    -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="splashScreen">
+  <div class="splash-bg"></div>
+  <div class="splash-grid"></div>
+
+  <div class="splash-brand">
+    <div class="splash-icon">🍺</div>
+    <div class="splash-title">BartracKE</div>
+    <div class="splash-sub">Complete Bar & Restaurant Management</div>
+  </div>
+
+  <div class="auth-container">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Register Staff</button>
+      <button class="auth-tab" onclick="switchAuthTab('branch')">Branches</button>
+    </div>
+    <div class="auth-body">
+
+      <!-- LOGIN -->
+      <div class="auth-panel active" id="panel-login">
+        <div class="f-group">
+          <label class="f-label">Email or Phone Number</label>
+          <input class="f-input" id="li-user" placeholder="e.g. john@bar.com or 0712345678" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" />
+          <div style="font-size:10px;color:var(--text-dim);margin-top:5px;">✅ Kenyan numbers: 07XXXXXXXX, 01XXXXXXXX or +2547XXXXXXXX</div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Password</label>
+          <input class="f-input" id="li-pass" type="password" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" />
+        </div>
+        <div class="f-group">
+          <label class="f-label">Branch</label>
+          <select class="f-select" id="li-branch"></select>
+        </div>
+        <div class="alert alert-err" id="li-alert"></div>
+        <button class="btn btn-gold" id="loginSubmitBtn" onclick="doLogin()">
+          <span id="loginBtnText">🔐 Sign In to Dashboard</span>
+        </button>
+
+
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-panel" id="panel-register">
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Full Name</label>
+            <input class="f-input" id="reg-name" placeholder="Full name" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Email Address</label>
+            <input class="f-input" id="reg-email" placeholder="email@example.com" type="email" />
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Kenyan Phone Number</label>
+            <input class="f-input" id="reg-phone" placeholder="07XXXXXXXX or 01XXXXXXXX" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Password</label>
+            <input class="f-input" id="reg-pass" type="password" placeholder="Password" />
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Role</label>
+            <select class="f-select" id="reg-role">
+              <option value="manager">Manager</option>
+              <option value="counter">Counter Attendant</option>
+              <option value="waiter">Waiter / Waitress</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Assign to Branch</label>
+            <select class="f-select" id="reg-branch"></select>
+          </div>
+        </div>
+        <div class="f-group" style="margin-top:8px;">
+          <label class="f-label">🔐 Owner Password (required)</label>
+          <input class="f-input" id="reg-owner-pin" type="password" placeholder="Enter Owner password to authorise" />
+        </div>
+        <div class="alert alert-err" id="reg-alert"></div>
+        <div class="notice" style="margin-bottom:14px;font-size:12px;">🔐 Only the Owner can register new staff. Enter Owner password above to authorise.</div>
+        <button class="btn btn-gold" onclick="doRegister()">✅ Register Staff Member</button>
+      </div>
+
+      <!-- BRANCH MANAGEMENT -->
+      <div class="auth-panel" id="panel-branch">
+        <div class="f-group">
+          <label class="f-label">Branch Name</label>
+          <input class="f-input" id="br-name" placeholder="e.g. Main Street Branch" />
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Location / Address</label>
+            <input class="f-input" id="br-loc" placeholder="Physical address" />
+          </div>
+          <div class="f-group">
+            <label class="f-label">Manager Name</label>
+            <input class="f-input" id="br-mgr" placeholder="Branch manager" />
+          </div>
+        </div>
+        <div class="f-group" style="margin-top:4px;">
+          <label class="f-label">🔐 Owner Password (required)</label>
+          <input class="f-input" id="br-owner-pin" type="password" placeholder="Enter Owner password to authorise" />
+        </div>
+        <div class="alert alert-err" id="br-alert"></div>
+        <button class="btn btn-gold" onclick="addBranch()">Add Branch</button>
+        <div class="divider"></div>
+        <div id="branchList" style="display:grid;gap:8px;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--                       APP SHELL                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="appShell">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-logo">🍺 BartracKE</div>
+      <div class="branch-selector">
+        🏢 <select id="activeBranchSel" onchange="changeBranch(this.value)"></select>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="shift-badge off" id="shiftBadge">⏸ Shift Off</div>
+      <button class="notif-btn" onclick="showPage('orders')">🔔<span class="notif-count" id="notifCount">0</span></button>
+      <div class="user-chip">
+        <div class="user-avatar" id="topAvatar">?</div>
+        <div><div class="user-name" id="topName">—</div><div class="user-role-tag" id="topRole">—</div></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);">Exit</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+          <span class="nav-icon">📊</span> Dashboard
+        </div>
+      </div>
+      <div class="sidebar-section" id="sideStockSection">
+        <div class="sidebar-label">Inventory</div>
+        <div class="nav-item" onclick="showPage('stock')" id="nav-stock">
+          <span class="nav-icon">📦</span> Stock
+        </div>
+        <div id="nav-transfers" class="nav-item" style="display:none;" onclick="showPage('transfers')">
+          <span class="nav-icon">🔄</span> Transfers
+        </div>
+        <div class="nav-item" onclick="showPage('suppliers')" id="nav-suppliers">
+          <span class="nav-icon">🏭</span> Suppliers
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Operations</div>
+        <div class="nav-item" onclick="showPage('orders')" id="nav-orders">
+          <span class="nav-icon">🧾</span> Orders
+          <span class="nav-badge" id="navOrderBadge" style="display:none">0</span>
+        </div>
+        <div class="nav-item" onclick="showPage('shifts')" id="nav-shifts">
+          <span class="nav-icon">⏱</span> Shifts
+        </div>
+      </div>
+      <div class="sidebar-section" id="sideMgmtSection">
+        <div class="sidebar-label">Management</div>
+        <div id="nav-staff" class="nav-item" style="display:none;" onclick="showPage('staff')">
+          <span class="nav-icon">👥</span> Staff
+        </div>
+        <div id="nav-branches" class="nav-item" style="display:none;" onclick="showPage('branches')">
+          <span class="nav-icon">🏢</span> Branches
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Analytics</div>
+        <div class="nav-item" onclick="showPage('reports')" id="nav-reports">
+          <span class="nav-icon">📈</span> Reports
+        </div>
+        <div class="nav-item" onclick="showPage('history')" id="nav-history">
+          <span class="nav-icon">📅</span> History
+        </div>
+        <div class="nav-item" onclick="showPage('audit')" id="nav-audit">
+          <span class="nav-icon">🔍</span> Audit Trail
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages -->
+    <div class="content">
+
+      <!-- ────────────────── DASHBOARD ────────────────── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1 id="dashTitle">Dashboard</h1>
+            <p id="dashMeta" class="text-muted"></p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-ghost btn-sm" onclick="showPage('reports')">📈 View Reports</button>
+          </div>
+        </div>
+
+        <!-- Shift panel -->
+        <div class="shift-panel" id="dashShiftPanel">
+          <div class="shift-info">
+            <div>
+              <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Current Shift</div>
+              <div class="shift-timer" id="shiftClock">00:00:00</div>
+            </div>
+            <div id="shiftPanelStatus"></div>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-success btn-sm" id="startShiftBtn" onclick="startShift()">▶ Start Shift</button>
+            <button class="btn btn-danger btn-sm" id="endShiftBtn" onclick="endShift()" style="display:none">⏹ End Shift</button>
+          </div>
+        </div>
+
+        <div class="stats-row" id="dashStats"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;" class="dash-bottom">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">📦 Stock Chain</div></div>
+            <div class="chain">
+              <div class="chain-step"><div class="cs-icon">🏭</div><div class="cs-label">Supplier</div></div>
+              <div class="chain-arrow">→</div>
+              <div class="chain-step"><div class="cs-icon">👑</div><div class="cs-label">Owner</div></div>
+              <div class="chain-arrow">→</div>
+              <div class="chain-step"><div class="cs-icon">🧑‍💼</div><div class="cs-label">Manager</div></div>
+              <div class="chain-arrow">→</div>
+              <div class="chain-step"><div class="cs-icon">🍾</div><div class="cs-label">Counter</div></div>
+              <div class="chain-arrow">→</div>
+              <div class="chain-step"><div class="cs-icon">👤</div><div class="cs-label">Customer</div></div>
+            </div>
+            <div id="dashStockMini"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">🕐 Recent Activity</div></div>
+            <div id="dashActivity" style="max-height:220px;overflow-y:auto;"></div>
+          </div>
+        </div>
+
+        <style>
+          @media(max-width:768px){.dash-bottom{grid-template-columns:1fr;}}
+        </style>
+      </div>
+
+      <!-- ────────────────── STOCK ────────────────── -->
+      <div class="page" id="page-stock">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>📦 Stock Management</h1>
+            <p class="text-muted">Track inventory from supplier to counter</p>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          </div>
+        </div>
+        <div class="alert alert-ok" id="stockOk"></div>
+        <div class="alert alert-err" id="stockErr"></div>
+
+        <!-- Owner add stock -->
+        <div class="card" id="ownerAddStockCard" style="display:none;">
+          <div class="card-hdr"><div class="card-title">➕ Record Stock from Supplier</div></div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Item Name</label><input class="f-input" id="si-name" placeholder="e.g. Tusker Lager 500ml" /></div>
+            <div class="f-row2"><label class="f-label">Category</label>
+              <select class="f-select" id="si-cat">
+                <option>Beer</option><option>Wine</option><option>Spirits</option>
+                <option>Soft Drinks</option><option>Water</option><option>Food</option><option>Other</option>
+              </select>
+            </div>
+            <div class="f-row2"><label class="f-label">Quantity Received</label><input class="f-input" id="si-qty" type="number" placeholder="0" min="0" /></div>
+            <div class="f-row2"><label class="f-label">Unit Cost</label><input class="f-input" id="si-cost" type="number" placeholder="0.00" min="0" step="0.01" /></div>
+            <div class="f-row2"><label class="f-label">Selling Price</label><input class="f-input" id="si-price" type="number" placeholder="0.00" min="0" step="0.01" /></div>
+            <div class="f-row2"><label class="f-label">Supplier</label>
+              <select class="f-select" id="si-supplier"><option value="">— Select Supplier —</option></select>
+            </div>
+          </div>
+          <button class="btn btn-gold" style="width:auto;margin-top:4px;" onclick="addStockItem()">Record Stock</button>
+        </div>
+
+        <!-- Master table (owner + manager) -->
+        <div class="card" id="masterStockCard" style="display:none;">
+          <div class="card-hdr">
+            <div><div class="card-title">📋 Master Inventory</div><div class="card-sub" id="branchStockLabel"></div></div>
+            <input class="f-input" style="width:200px;" placeholder="🔍 Search stock…" oninput="filterStock(this.value)" />
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Category</th><th>Received</th><th>Manager Hold</th><th>At Counter</th><th>Sold</th><th>Remaining</th><th>Unit Price</th><th>Value</th><th>Status</th></tr></thead>
+              <tbody id="masterStockTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Counter stock view -->
+        <div class="card" id="counterStockCard" style="display:none;">
+          <div class="card-hdr"><div class="card-title">🍾 Counter Stock — My Allocation</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Category</th><th>Allocated</th><th>Remaining</th><th>Sold</th><th>Level</th></tr></thead>
+              <tbody id="counterStockTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Waiter view -->
+        <div class="notice" id="waiterStockNotice" style="display:none;">
+          🍽️ As a waiter, you can view available items when placing orders. Check the Orders page to take orders.
+        </div>
+      </div>
+
+      <!-- ────────────────── TRANSFERS ────────────────── -->
+      <div class="page" id="page-transfers">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>🔄 Stock Transfers</h1>
+            <p class="text-muted">Owner → Branch Manager → Counter Attendant chain of custody</p>
+          </div>
+        </div>
+        <div class="alert alert-ok" id="trOk"></div>
+        <div class="alert alert-err" id="trErr"></div>
+
+        <!-- Owner: transfer stock to branch manager -->
+        <div class="card" id="ownerTransferCard" style="display:none;">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">👑 Transfer Stock to Branch Manager</div>
+              <div class="card-sub">Move stock from main inventory to a branch manager's holding</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="f-row2">
+              <label class="f-label">Target Branch</label>
+              <select class="f-select" id="otr-branch" onchange="populateOwnerTransferItems()">
+              </select>
+            </div>
+            <div class="f-row2">
+              <label class="f-label">Stock Item</label>
+              <select class="f-select" id="otr-item"></select>
+            </div>
+            <div class="f-row2">
+              <label class="f-label">Quantity to Transfer</label>
+              <input class="f-input" id="otr-qty" type="number" placeholder="0" min="1" />
+            </div>
+          </div>
+          <div class="alert alert-ok" id="otrOk"></div>
+          <div class="alert alert-err" id="otrErr"></div>
+          <div class="flex gap-8" style="flex-wrap:wrap;">
+            <button class="btn btn-gold" style="width:auto;" onclick="doOwnerTransfer()">👑 Transfer to Branch Manager</button>
+          </div>
+        </div>
+
+        <!-- Manager: allocate stock to counter -->
+        <div class="card" id="managerTransferCard" style="display:none;">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">📤 Allocate Stock to Counter Attendant</div>
+              <div class="card-sub">Move items from your manager holding to the counter</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Select Item</label><select class="f-select" id="tr-item"></select></div>
+            <div class="f-row2"><label class="f-label">Quantity</label><input class="f-input" id="tr-qty" type="number" placeholder="0" min="1" /></div>
+          </div>
+          <div class="flex gap-8" style="flex-wrap:wrap;">
+            <button class="btn btn-gold" style="width:auto;" onclick="doTransfer()">Transfer to Counter</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">📜 Transfer Log</div>
+            <span class="badge badge-teal" id="trCount">0 records</span>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Date & Time</th><th>Branch</th><th>Item</th><th>Qty</th><th>From</th><th>To</th><th>Authorized By</th></tr></thead>
+              <tbody id="trLogTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── SUPPLIERS ────────────────── -->
+      <div class="page" id="page-suppliers">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>🏭 Supplier Directory</h1>
+            <p class="text-muted">Manage your supplier contacts and records</p>
+          </div>
+        </div>
+        <div class="alert alert-ok" id="supOk"></div>
+
+        <div class="card" id="addSupplierCard">
+          <div class="card-hdr"><div class="card-title">➕ Add Supplier</div></div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Company Name</label><input class="f-input" id="sup-name" placeholder="Supplier company name" /></div>
+            <div class="f-row2"><label class="f-label">Contact Person</label><input class="f-input" id="sup-contact" placeholder="Contact name" /></div>
+            <div class="f-row2"><label class="f-label">Phone Number</label><input class="f-input" id="sup-phone" placeholder="+27 11 000 0000" /></div>
+            <div class="f-row2"><label class="f-label">Email Address</label><input class="f-input" id="sup-email" placeholder="email@supplier.com" /></div>
+            <div class="f-row2"><label class="f-label">Products Supplied</label><input class="f-input" id="sup-products" placeholder="Beer, Spirits, Soft Drinks…" /></div>
+            <div class="f-row2"><label class="f-label">Payment Terms</label>
+              <select class="f-select" id="sup-terms">
+                <option>Cash on Delivery</option><option>7 Days</option><option>14 Days</option><option>30 Days</option><option>60 Days</option>
+              </select>
+            </div>
+          </div>
+          <div class="f-row2"><label class="f-label">Notes</label><textarea class="f-input" id="sup-notes" rows="2" placeholder="Additional notes…" style="resize:vertical;"></textarea></div>
+          <button class="btn btn-gold" style="width:auto;margin-top:4px;" onclick="addSupplier()">Save Supplier</button>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📋 Supplier Directory</div><span class="badge badge-teal" id="supCount">0 suppliers</span></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Email</th><th>Products</th><th>Terms</th><th>Actions</th></tr></thead>
+              <tbody id="supTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── ORDERS ────────────────── -->
+      <div class="page" id="page-orders">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>🧾 Orders</h1>
+            <p class="text-muted" id="ordersSubtitle">Manage customer orders end-to-end</p>
+          </div>
+          <div class="flex gap-8 items-center">
+            <select class="f-select" style="width:160px;" id="orderFilterSel" onchange="renderOrders()">
+              <option value="all">All Orders</option>
+              <option value="pending">Pending</option>
+              <option value="dispatched">Dispatched</option>
+              <option value="paid">Paid</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="alert" id="ordOk"></div>
+        <div class="alert" id="ordErr"></div>
+
+        <!-- Waiter: take order -->
+        <div class="card" id="waiterOrderCard" style="display:none;">
+          <div class="card-hdr"><div class="card-title">➕ Take New Customer Order</div></div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Table / Customer Name</label><input class="f-input" id="ord-table" placeholder="e.g. Table 5 or Customer Name" /></div>
+            <div class="f-row2"><label class="f-label">Select Item</label><select class="f-select" id="ord-item"></select></div>
+            <div class="f-row2"><label class="f-label">Quantity</label><input class="f-input" id="ord-qty" type="number" min="1" value="1" /></div>
+            <div class="f-row2"><label class="f-label">Special Notes</label><input class="f-input" id="ord-notes" placeholder="e.g. No ice, extra lime…" /></div>
+          </div>
+          <div class="flex gap-8 mb-16">
+            <button class="btn btn-ghost btn-sm" onclick="addToCart()">+ Add Item to Order</button>
+          </div>
+          <div id="cartPreview"></div>
+          <div class="divider"></div>
+          <button class="btn btn-gold" style="width:auto;" onclick="submitOrder()">📤 Submit Order to Counter</button>
+        </div>
+
+        <!-- Counter: incoming notice -->
+        <div class="card" id="counterIncomingCard" style="display:none;">
+          <div class="card-hdr">
+            <div><div class="card-title">📥 Incoming Orders from Waiters</div></div>
+            <span class="badge badge-gold" id="pendingCountBadge">0 Pending</span>
+          </div>
+          <p class="text-muted fs-12">Dispatch drinks to the waiter. Stock is automatically deducted when you dispatch.</p>
+        </div>
+
+        <div class="orders-grid" id="ordersGrid" style="margin-top:16px;"></div>
+      </div>
+
+      <!-- ────────────────── SHIFTS ────────────────── -->
+      <div class="page" id="page-shifts">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>⏱ Shift Management</h1>
+            <p class="text-muted">Track working hours and generate shift reports</p>
+          </div>
+        </div>
+
+        <div class="shift-panel">
+          <div class="shift-info">
+            <div>
+              <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Current Session</div>
+              <div class="shift-timer" id="shiftTimerLarge">00:00:00</div>
+              <div id="shiftStartLabel" class="fs-11 text-muted"></div>
+            </div>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-success" id="startShiftBtn2" onclick="startShift()">▶ Start Shift</button>
+            <button class="btn btn-danger" id="endShiftBtn2" onclick="endShift()" style="display:none;">⏹ End Shift & Generate Report</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📋 Shift History</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Staff</th><th>Role</th><th>Branch</th><th>Start</th><th>End</th><th>Duration</th><th>Orders</th><th>Revenue</th><th>Report</th></tr></thead>
+              <tbody id="shiftsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── STAFF ────────────────── -->
+      <div class="page" id="page-staff">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>&#128101; Staff Management</h1>
+            <p class="text-muted">Manage your team across all branches</p>
+          </div>
+          <div class="flex gap-8 items-center">
+            <span class="badge badge-teal" id="staffCount" style="padding:6px 14px;font-size:11px;">0 members</span>
+          </div>
+        </div>
+
+        <div class="card" id="addStaffCard" style="display:none;">
+          <div class="card-hdr"><div class="card-title">&#10133; Register New Staff Member</div></div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Full Name</label><input class="f-input" id="st-name" placeholder="Full name" /></div>
+            <div class="f-row2"><label class="f-label">Email Address</label><input class="f-input" id="st-email" placeholder="email@example.com" type="email" /></div>
+            <div class="f-row2"><label class="f-label">Kenyan Phone Number</label><input class="f-input" id="st-phone" placeholder="07XXXXXXXX or 01XXXXXXXX" /></div>
+            <div class="f-row2"><label class="f-label">Password</label><input class="f-input" id="st-pass" type="password" placeholder="Temporary password" /></div>
+            <div class="f-row2"><label class="f-label">Role</label>
+              <select class="f-select" id="st-role">
+                <option value="manager">Manager</option>
+                <option value="counter">Counter Attendant</option>
+                <option value="waiter">Waiter / Waitress</option>
+              </select>
+            </div>
+            <div class="f-row2"><label class="f-label">Branch</label><select class="f-select" id="st-branch"></select></div>
+          </div>
+          <div class="alert alert-err" id="stErr"></div>
+          <div class="alert alert-ok" id="stOk"></div>
+          <button class="btn btn-gold" style="width:auto;" onclick="addStaff()">&#9989; Register Staff</button>
+        </div>
+
+        <!-- Staff Cards Grid -->
+        <div class="staff-grid" id="staffCardsGrid"></div>
+      </div>
+
+      <!-- ────────────────── BRANCHES ────────────────── -->
+      <div class="page" id="page-branches">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>🏢 Branch Management</h1>
+            <p class="text-muted">Manage all your bar locations</p>
+          </div>
+        </div>
+
+        <div class="card" id="addBranchCard" style="display:none;">
+          <div class="card-hdr"><div class="card-title">➕ Add New Branch</div></div>
+          <div class="form-grid">
+            <div class="f-row2"><label class="f-label">Branch Name</label><input class="f-input" id="b2-name" placeholder="e.g. Downtown Branch" /></div>
+            <div class="f-row2"><label class="f-label">Location</label><input class="f-input" id="b2-loc" placeholder="Address or area" /></div>
+            <div class="f-row2"><label class="f-label">Manager</label><input class="f-input" id="b2-mgr" placeholder="Manager name" /></div>
+            <div class="f-row2"><label class="f-label">Phone</label><input class="f-input" id="b2-phone" placeholder="Branch contact" /></div>
+          </div>
+          <div class="alert alert-ok" id="b2Ok"></div>
+          <button class="btn btn-gold" style="width:auto;" onclick="addBranch2()">Add Branch</button>
+        </div>
+
+        <div id="branchCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;"></div>
+      </div>
+
+      <!-- ────────────────── REPORTS ────────────────── -->
+      <div class="page" id="page-reports">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>📈 Reports & Analytics</h1>
+            <p class="text-muted">Business performance across all branches</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportReport()">⬇ Download PDF Report</button>
+        </div>
+
+        <div class="stats-row" id="reportStats"></div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">📊 Stock Levels</div></div>
+            <div id="stockLevels"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><div class="card-title">🏢 Revenue by Branch</div></div>
+            <div id="branchRevenue"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">🍽️ Waiter Performance — Payment Collection</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Staff</th><th>Branch</th><th>Orders</th><th>Paid</th><th>Pending</th><th>Revenue</th><th>Collection Rate</th></tr></thead>
+              <tbody id="waiterPerfTbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📦 Top Selling Items</div></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Item</th><th>Category</th><th>Units Sold</th><th>Revenue</th><th>Branch</th></tr></thead>
+              <tbody id="topItemsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── AUDIT TRAIL ────────────────── -->
+      <div class="page" id="page-audit">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>🔍 Audit Trail</h1>
+            <p class="text-muted">Complete log of all system activities</p>
+          </div>
+          <div class="flex gap-8">
+            <select class="f-select" style="width:160px;" id="auditFilter" onchange="renderAudit()">
+              <option value="all">All Actions</option>
+              <option value="stock">Stock</option>
+              <option value="order">Orders</option>
+              <option value="transfer">Transfers</option>
+              <option value="shift">Shifts</option>
+              <option value="auth">Auth</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">📜 Full Activity Log</div><span class="badge badge-teal" id="auditCount">0 entries</span></div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Timestamp</th><th>Type</th><th>Branch</th><th>User</th><th>Role</th><th>Action</th></tr></thead>
+              <tbody id="auditTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ────────────────── HISTORY ────────────────── -->
+      <div class="page" id="page-history">
+        <div class="page-hdr">
+          <div class="page-hdr-left">
+            <h1>📅 Transaction History</h1>
+            <p class="text-muted">Orders and revenue across all time periods</p>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="exportHistoryPDF()">⬇ Export PDF</button>
+        </div>
+
+        <!-- Period selector -->
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+          <label class="f-label" style="margin:0;">📆 Period</label>
+          <select class="f-select" style="width:200px;font-weight:600;" id="histPeriodSelect" onchange="setHistoryPeriod(this.value)">
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+            <option value="week">This Week</option>
+            <option value="lastweek">Last Week</option>
+            <option value="month">This Month</option>
+            <option value="lastmonth">Last Month</option>
+            <option value="year">This Year</option>
+            <option value="lastyear">Last Year</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+
+        <div class="stats-row" id="historyStats"></div>
+
+        <!-- Revenue by Branch for period -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;" class="hist-top-grid">
+          <div class="card" style="margin:0;">
+            <div class="card-hdr"><div class="card-title">🏢 Revenue by Branch</div></div>
+            <div id="histBranchRevenue"></div>
+          </div>
+          <div class="card" style="margin:0;">
+            <div class="card-hdr"><div class="card-title">🍽️ Top Items Sold</div></div>
+            <div id="histTopItems"></div>
+          </div>
+        </div>
+        <style>@media(max-width:768px){.hist-top-grid{grid-template-columns:1fr;}}</style>
+
+        <!-- Orders table for period -->
+        <div class="card">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title" id="histOrdersTitle">Orders — Today</div>
+              <div class="card-sub" id="histOrdersSub"></div>
+            </div>
+            <select class="f-select" style="width:160px;" id="histStatusFilter" onchange="renderHistoryOrders()">
+              <option value="all">All Statuses</option>
+              <option value="paid">Paid</option>
+              <option value="dispatched">Dispatched</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr><th>Order #</th><th>Table/Customer</th><th>Waiter</th><th>Branch</th><th>Items</th><th>Total</th><th>Status</th><th>Time</th></tr></thead>
+              <tbody id="histOrdersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+  </div><!-- /layout -->
+</div><!-- /appShell -->
+
+<!-- Modal -->
+<div class="modal-ov" id="modalOv" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modalTitle">Details</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Receipt Print Area (hidden, used for window.print()) -->
+<div id="receiptPrintArea" style="display:none;"></div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--                       JAVASCRIPT                       -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────
+// DATA STORE
+// ─────────────────────────────────────────────────────────
+const DB = {
+  branches: [],
+  users: [],
+  stock: [],
+  transfers: [],
+  orders: [],
+  suppliers: [],
+  shifts: [],
+  audit: [],
+};
+
+let SESSION = {
+  user: null,
+  branch: null,
+  shiftActive: false,
+  shiftStart: null,
+  shiftTimer: null,
+  clockInterval: null,
+  orderIdCounter: 1000,
+  cart: [],
+};
+
+// ─────────────────────────────────────────────────────────
+// SEED DATA
+// ─────────────────────────────────────────────────────────
+function seedData() {
+  // Clean installation — Bungoma HQ branch + owner account
+  const bungomaBranchId = 'branch-bungoma-hq';
+  DB.branches  = [{
+    id: bungomaBranchId,
+    name: 'Bungoma',
+    location: 'Bungoma Town',
+    manager: 'System Owner',
+    phone: '+254726767309'
+  }];
+  DB.users     = [{
+    id:'owner-1',
+    name:'System Owner',
+    username:'nakibongochiali@gmail.com',
+    email:'nakibongochiali@gmail.com',
+    phone:'',
+    password:'Bartracke@2018',
+    role:'owner',
+    branchId: bungomaBranchId,
+    active:true
+  }];
+  DB.stock     = [];
+  DB.transfers = [];
+  DB.orders    = [];
+  DB.suppliers = [];
+  DB.shifts    = [];
+  DB.audit     = [{time:ts(),type:'auth',branch:'Bungoma',user:'System Owner',role:'owner',action:'BarTracKE initialised — Bungoma branch created'}];
+}
+
+// ─────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────
+function ts() { return new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function uid() { return 'id' + Math.random().toString(36).substr(2,9); }
+function showEl(id,show=true){ const e=document.getElementById(id); if(e) e.style.display=show?'block':'none'; }
+function showAlert(id, msg, type='ok', dur=4000){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=msg;
+  el.className=`alert alert-${type} show`;
+  setTimeout(()=>{el.className=`alert alert-${type}`;},dur);
+}
+function closeModal(e){ if(!e||e.target===document.getElementById('modalOv')) document.getElementById('modalOv').classList.remove('open'); }
+function openModal(title,body){ document.getElementById('modalTitle').innerHTML=title; document.getElementById('modalBody').innerHTML=body; document.getElementById('modalOv').classList.add('open'); }
+
+function addAudit(type,action){
+  const b = DB.branches.find(x=>x.id===SESSION.branch?.id);
+  DB.audit.push({time:ts(),type,branch:b?.name||'—',user:SESSION.user?.name||'—',role:SESSION.user?.role||'—',action});
+  saveDB();
+}
+
+function branchStock(branchId){ return DB.stock.filter(s=>s.branchId===branchId); }
+function currentBranchId(){ return SESSION.branch?.id||DB.branches[0]?.id; }
+
+// ─────────────────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────────────────
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>{
+    const tabs=['login','register','branch'];
+    t.classList.toggle('active', tabs[i]===tab);
+  });
+  document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  if(tab==='branch'||tab==='register') renderSplashBranches();
+}
+
+function renderSplashBranches(){
+  const sel1=document.getElementById('li-branch');
+  const sel2=document.getElementById('reg-branch');
+  const list=document.getElementById('branchList');
+  const opts = DB.branches.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+  if(sel1) sel1.innerHTML = opts||'<option>No branches yet</option>';
+  if(sel2) sel2.innerHTML = opts||'<option>No branches yet</option>';
+  if(list) list.innerHTML = DB.branches.map(b=>`
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:13px;font-weight:600;">${b.name}</div><div style="font-size:11px;color:var(--text-muted);">${b.location} · ${b.manager}</div></div>
+      <span class="badge badge-teal">Active</span>
+    </div>`).join('') || '<p class="text-muted fs-12">No branches added yet.</p>';
+}
+
+function addBranch(){
+  const ownerPin=document.getElementById('br-owner-pin').value;
+  const owner=DB.users.find(u=>u.role==='owner'&&u.password===ownerPin);
+  if(!owner) return showAlert('br-alert','Owner password required to add a branch.','err');
+  const name=document.getElementById('br-name').value.trim();
+  const loc=document.getElementById('br-loc').value.trim();
+  const mgr=document.getElementById('br-mgr').value.trim();
+  if(!name) return showAlert('br-alert','Branch name required.','err');
+  DB.branches.push({id:uid(),name,location:loc,manager:mgr,phone:''});
+  saveDB();
+  ['br-name','br-loc','br-mgr','br-owner-pin'].forEach(id=>document.getElementById(id).value='');
+  renderSplashBranches();
+  showAlert('br-alert',`✅ Branch "${name}" added!`,'ok');
+}
+
+function normalizeKenyanPhone(input){
+  // Normalise various Kenyan phone formats to 07XXXXXXXX or 01XXXXXXXX
+  let p = input.trim().replace(/\s+/g,'');
+  if(/^\+254[17]\d{8}$/.test(p)) return '0'+p.slice(4);   // +2547... or +2541...
+  if(/^254[17]\d{8}$/.test(p))   return '0'+p.slice(3);   // 2547... or 2541...
+  if(/^0[17]\d{8}$/.test(p))     return p;                  // 07... or 01...
+  return null;
+}
+
+function isEmail(val){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val); }
+
+function doLogin(){
+  const raw = document.getElementById('li-user').value.trim();
+  const password = document.getElementById('li-pass').value;
+  const branchId = document.getElementById('li-branch').value;
+
+  if(!raw) return showAlert('li-alert','Enter your email or phone number.','err');
+  if(!password) return showAlert('li-alert','Enter your password.','err');
+
+  // Determine if input is email or phone
+  let user = null;
+  if(isEmail(raw)){
+    user = DB.users.find(u=>u.email===raw.toLowerCase() && u.password===password);
+    if(!user) return showAlert('li-alert','Email or password is incorrect.','err');
+  } else {
+    const normalised = normalizeKenyanPhone(raw);
+    if(!normalised) return showAlert('li-alert','Enter a valid Kenyan phone (07XXXXXXXX, 01XXXXXXXX, or +2547XXXXXXXX) or email address.','err');
+    user = DB.users.find(u=>normalizeKenyanPhone(u.phone)===normalised && u.password===password);
+    if(!user) return showAlert('li-alert','Phone number or password is incorrect.','err');
+  }
+
+  if(!user.active) return showAlert('li-alert','Your account has been deactivated. Contact your manager.','err');
+
+  // Owner can login to any branch; others must match their assigned branch
+  if(user.role!=='owner' && user.branchId !== branchId){
+    return showAlert('li-alert','You are not assigned to this branch.','err');
+  }
+
+  const branch = DB.branches.find(b=>b.id===(user.role==='owner'?branchId:user.branchId));
+  if(!branch) return showAlert('li-alert','Branch not found.','err');
+
+  // Visual feedback on button
+  const btn = document.getElementById('loginSubmitBtn');
+  const txt = document.getElementById('loginBtnText');
+  btn.disabled = true;
+  txt.textContent = '⏳ Signing in…';
+
+  // Safety net — if anything in the Firebase flow hangs, unblock the button
+  // after 12 seconds so the user is never permanently stuck.
+  const _loginTimeout = setTimeout(function(){
+    console.warn('[BarTracKE] Login timed out — proceeding without Firebase Auth.');
+    btn.disabled = false;
+    txt.textContent = '🔐 Sign In to Dashboard';
+    showAlert('li-alert', '⚠️ Login is taking longer than usual. Check your internet connection and try again.', 'err');
+  }, 12000);
+
+  function _finishLogin(){
+    clearTimeout(_loginTimeout);
+    SESSION.user = user;
+    SESSION.branch = branch;
+    addAudit('auth','Logged in');
+    launchApp();
+    btn.disabled = false;
+    txt.textContent = '🔐 Sign In to Dashboard';
+  }
+
+  // After Firebase Auth, restore Firestore data if needed (cold start),
+  // then launch the app.
+  function _afterAuth(){
+    _doFirestoreRestore(function(){
+      // Re-validate user/branch from the freshly restored DB
+      const freshUser = DB.users.find(u => u.id === user.id) || user;
+      const freshBranch = DB.branches.find(b => b.id === branch.id) || branch;
+      user = freshUser;
+      branch = freshBranch;
+      _finishLogin();
+    });
+  }
+
+  // If Firebase is not available (offline/init failed), skip straight to app
+  if(!_fbOK || !_auth){
+    console.log('[BarTracKE] Firebase unavailable — logging in offline.');
+    _afterAuth();
+    return;
+  }
+
+  // Sign into Firebase Auth — onAuthStateChanged will start the real-time
+  // listener once this succeeds, ensuring sync is active in the app.
+  _auth.signInWithEmailAndPassword(user.email, user.password)
+    .then(function(){
+      console.log('[BarTracKE] Firebase Auth signed in ✅');
+      _afterAuth();
+    })
+    .catch(function(e){
+      console.warn('[BarTracKE] Firebase Auth sign-in error:', e.code);
+      // Account doesn't exist yet in Firebase Auth — create it silently
+      if(e.code==='auth/user-not-found' ||
+         e.code==='auth/invalid-credential' ||
+         e.code==='auth/invalid-login-credentials' ||
+         e.code==='auth/wrong-password'){
+        _auth.createUserWithEmailAndPassword(user.email, user.password)
+          .then(function(){
+            console.log('[BarTracKE] Firebase Auth account auto-created ✅');
+            _afterAuth();
+          })
+          .catch(function(e2){
+            // Account may already exist with different password, or other error —
+            // either way, the app-level password was already validated above so
+            // it's safe to proceed.
+            console.warn('[BarTracKE] Auth create failed:', e2.code, e2.message);
+            _afterAuth();
+          });
+      } else {
+        // Any other Firebase error (network, config) — still let user in
+        // because app-level credentials were already verified above.
+        console.warn('[BarTracKE] Firebase Auth failed, proceeding offline:', e.message);
+        _afterAuth();
+      }
+    });
+}
+
+
+function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim().toLowerCase();
+  const phone=document.getElementById('reg-phone').value.trim();
+  const password=document.getElementById('reg-pass').value;
+  const role=document.getElementById('reg-role').value;
+  const branchId=document.getElementById('reg-branch').value;
+  const ownerPin=document.getElementById('reg-owner-pin').value;
+  if(!name||!email||!phone||!password) return showAlert('reg-alert','Fill all fields.','err');
+  if(!isEmail(email)) return showAlert('reg-alert','Enter a valid email address.','err');
+  if(!normalizeKenyanPhone(phone)) return showAlert('reg-alert','Enter a valid Kenyan phone (07XX or 01XX).','err');
+  const owner=DB.users.find(u=>u.role==='owner'&&u.password===ownerPin);
+  if(!owner) return showAlert('reg-alert','Owner password required to register staff.','err');
+  if(DB.users.find(u=>u.email===email)) return showAlert('reg-alert','Email already registered.','err');
+  const newUser={id:uid(),name,username:email,email,phone:normalizeKenyanPhone(phone),password,role,branchId,active:true};
+  DB.users.push(newUser);
+  saveDB();
+  // Create Firebase Auth account so they can authenticate with Firestore
+  _fbCreateAuthUser(email, password, name);
+  showAlert('reg-alert',`✅ ${name} registered as ${role}!`,'ok');
+  ['reg-name','reg-email','reg-phone','reg-pass','reg-owner-pin'].forEach(id=>document.getElementById(id).value='');
+}
+
+function logout(){
+  addAudit('auth','Logged out');
+  if(SESSION.shiftActive) endShift(true);
+  // Sign out of Firebase Auth
+  if(_fbOK && _auth){
+    _auth.signOut().catch(function(e){ console.warn('[BarTracKE] Auth sign-out error:', e); });
+  }
+  SESSION = {user:null,branch:null,shiftActive:false,shiftStart:null,shiftTimer:null,clockInterval:null,orderIdCounter:SESSION.orderIdCounter,cart:[]};
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('splashScreen').style.display='flex';
+  renderSplashBranches();
+}
+
+// ─────────────────────────────────────────────────────────
+// APP LAUNCH
+// ─────────────────────────────────────────────────────────
+function launchApp(){
+  document.getElementById('splashScreen').style.display='none';
+  document.getElementById('appShell').style.display='flex';
+
+  // topbar
+  const u=SESSION.user;
+  document.getElementById('topAvatar').textContent = u.name[0].toUpperCase();
+  document.getElementById('topName').textContent = u.name;
+  document.getElementById('topRole').textContent = roleLabel(u.role);
+
+  // branch selector
+  populateBranchSelector();
+
+  // sidebar visibility
+  setupSidebar();
+  renderSuppliersDropdown();
+  showPage('dashboard');
+}
+
+function populateBranchSelector(){
+  const sel = document.getElementById('activeBranchSel');
+  const u = SESSION.user;
+  if(u.role==='owner'){
+    sel.innerHTML = DB.branches.map(b=>`<option value="${b.id}" ${b.id===SESSION.branch.id?'selected':''}>${b.name}</option>`).join('');
+    sel.disabled = false;
+  } else {
+    sel.innerHTML = `<option>${SESSION.branch.name}</option>`;
+    sel.disabled = true;
+  }
+}
+
+function changeBranch(bId){
+  const b=DB.branches.find(x=>x.id===bId);
+  if(b){SESSION.branch=b;addAudit('auth',`Switched to branch: ${b.name}`);refreshCurrentPage();}
+}
+
+function setupSidebar(){
+  const r=SESSION.user.role;
+  const show=(id,vis)=>{const e=document.getElementById(id);if(e)e.style.display=vis?'flex':'none';};
+  const showBlock=(id,vis)=>{const e=document.getElementById(id);if(e)e.style.display=vis?'block':'none';};
+  showBlock('sideStockSection', r==='owner'||r==='manager'||r==='counter');
+  showBlock('sideMgmtSection', r==='owner'||r==='manager');
+  show('nav-staff', r==='owner');
+  show('nav-branches', r==='owner');
+  show('nav-transfers', r==='owner'||r==='manager');
+}
+
+function roleLabel(r){ return {owner:'👑 Owner',manager:'🧑‍💼 Manager',counter:'🍾 Counter Attendant',waiter:'🍽️ Waiter'}[r]||r; }
+function roleIcon(r){ return {owner:'👑',manager:'🧑‍💼',counter:'🍾',waiter:'🍽️'}[r]||''; }
+
+// ─────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────
+let currentPage='dashboard';
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const navEl=document.getElementById('nav-'+page);
+  if(navEl) navEl.classList.add('active');
+  currentPage=page;
+  document.getElementById('sidebar').classList.remove('open');
+  const pages={
+    dashboard:refreshDashboard,stock:refreshStock,transfers:refreshTransfers,
+    suppliers:refreshSuppliers,orders:refreshOrders,shifts:refreshShifts,
+    staff:refreshStaff,branches:refreshBranches,reports:refreshReports,
+    audit:renderAudit,history:refreshHistory
+  };
+  if(pages[page]) pages[page]();
+}
+
+function refreshCurrentPage(){ showPage(currentPage); }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+// ─────────────────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────────────────
+function refreshDashboard(){
+  const r=SESSION.user.role;
+  const bId=currentBranchId();
+  const bName=SESSION.branch.name;
+  const now=new Date();
+  const greet=now.getHours()<12?'Good Morning':now.getHours()<17?'Good Afternoon':'Good Evening';
+  document.getElementById('dashTitle').textContent=`${greet}, ${SESSION.user.name} ${roleIcon(r)}`;
+  document.getElementById('dashMeta').textContent=`${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${bName}`;
+
+  const bOrders=DB.orders.filter(o=>o.branchId===bId);
+  const bStock=branchStock(bId);
+  const revenue=bOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const pending=bOrders.filter(o=>o.status==='pending').length;
+  const outstanding=bOrders.filter(o=>o.status==='dispatched').reduce((a,o)=>a+o.total,0);
+  const totalStockVal=bStock.reduce((a,s)=>a+s.remaining*s.price,0);
+
+  let stats='';
+  if(r==='owner'||r==='manager'){
+    stats=`
+      <div class="stat gold"><div class="stat-lbl">Today's Revenue</div><div class="stat-val">Ksh ${revenue.toFixed(0)}</div><div class="stat-sub text-green">Collected & Paid</div></div>
+      <div class="stat red"><div class="stat-lbl">Outstanding</div><div class="stat-val">Ksh ${outstanding.toFixed(0)}</div><div class="stat-sub text-muted">Awaiting payment</div></div>
+      <div class="stat blue"><div class="stat-lbl">Total Orders</div><div class="stat-val">${bOrders.length}</div></div>
+      <div class="stat teal"><div class="stat-lbl">Stock Value</div><div class="stat-val">Ksh ${totalStockVal.toFixed(0)}</div></div>
+      <div class="stat red"><div class="stat-lbl">Pending Orders</div><div class="stat-val">${pending}</div></div>`;
+  } else if(r==='counter'){
+    const myStock=bStock.filter(s=>s.counterQty>0);
+    stats=`
+      <div class="stat gold"><div class="stat-lbl">Stock Items</div><div class="stat-val">${myStock.length}</div></div>
+      <div class="stat red"><div class="stat-lbl">Pending Orders</div><div class="stat-val">${pending}</div></div>
+      <div class="stat green"><div class="stat-lbl">Dispatched Today</div><div class="stat-val">${bOrders.filter(o=>o.status!=='pending').length}</div></div>`;
+  } else {
+    const myOrders=bOrders.filter(o=>o.waiterId===SESSION.user.id);
+    stats=`
+      <div class="stat gold"><div class="stat-lbl">My Orders</div><div class="stat-val">${myOrders.length}</div></div>
+      <div class="stat green"><div class="stat-lbl">Paid</div><div class="stat-val">${myOrders.filter(o=>o.status==='paid').length}</div></div>
+      <div class="stat red"><div class="stat-lbl">Pending Payment</div><div class="stat-val">${myOrders.filter(o=>o.status==='dispatched').length}</div></div>
+      <div class="stat blue"><div class="stat-lbl">My Revenue</div><div class="stat-val">Ksh ${myOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0).toFixed(0)}</div></div>`;
+  }
+  document.getElementById('dashStats').innerHTML=stats;
+
+  // Mini stock
+  const topStock=bStock.slice(0,4);
+  document.getElementById('dashStockMini').innerHTML = topStock.map(s=>{
+    const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+    const cls=pct>50?'prog-green':pct>20?'prog-gold':'prog-red';
+    return `<div class="prog-wrap"><div class="prog-meta"><span>${s.name}</span><span>${s.remaining} left</span></div><div class="prog-bar"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+  }).join('') || '<p class="text-muted fs-12">No stock data.</p>';
+
+  // Activity
+  document.getElementById('dashActivity').innerHTML = DB.audit.slice(-6).reverse().map(a=>`
+    <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:16px">${{stock:'📦',order:'🧾',transfer:'🔄',shift:'⏱',auth:'🔐'}[a.type]||'📌'}</span>
+      <div><div class="fs-12">${a.action}</div><div class="fs-11 text-muted">${a.time} · ${a.user}</div></div>
+    </div>`).join('') || '<p class="text-muted fs-12">No recent activity.</p>';
+
+  // Notification badge
+  const notifCount=DB.orders.filter(o=>o.status==='pending'&&o.branchId===bId).length;
+  document.getElementById('notifCount').textContent=notifCount;
+  document.getElementById('navOrderBadge').textContent=notifCount;
+  document.getElementById('navOrderBadge').style.display=notifCount>0?'inline':'none';
+}
+
+// ─────────────────────────────────────────────────────────
+// SHIFT MANAGEMENT
+// ─────────────────────────────────────────────────────────
+function startShift(){
+  if(SESSION.shiftActive) return;
+  SESSION.shiftActive=true;
+  SESSION.shiftStart=new Date();
+  SESSION.clockInterval=setInterval(updateShiftClock,1000);
+  document.getElementById('shiftBadge').className='shift-badge';
+  document.getElementById('shiftBadge').textContent='🟢 On Shift';
+  showEl('startShiftBtn',false); showEl('endShiftBtn',true);
+  showEl('startShiftBtn2',false); showEl('endShiftBtn2',true);
+  document.getElementById('shiftStartLabel').textContent=`Started: ${SESSION.shiftStart.toLocaleTimeString()}`;
+  addAudit('shift','Shift started');
+}
+
+function endShift(silent=false){
+  if(!SESSION.shiftActive) return;
+  clearInterval(SESSION.clockInterval);
+  SESSION.shiftActive=false;
+  const end=new Date();
+  const dur=Math.round((end-SESSION.shiftStart)/60000);
+  const h=Math.floor(dur/60), m=dur%60;
+  const bId=currentBranchId();
+  const myOrders=DB.orders.filter(o=>o.waiterId===SESSION.user.id&&o.branchId===bId);
+  const revenue=myOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+
+  DB.shifts.push({
+    id:uid(),userId:SESSION.user.id,name:SESSION.user.name,role:SESSION.user.role,
+    branchId:bId,start:SESSION.shiftStart.toLocaleString(),end:end.toLocaleString(),
+    duration:`${h}h ${m}m`,orders:myOrders.length,revenue
+  });
+
+  SESSION.shiftStart=null;
+  document.getElementById('shiftBadge').className='shift-badge off';
+  document.getElementById('shiftBadge').textContent='⏸ Shift Off';
+  ['shiftClock','shiftTimerLarge'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='00:00:00';});
+  showEl('startShiftBtn',true); showEl('endShiftBtn',false);
+  showEl('startShiftBtn2',true); showEl('endShiftBtn2',false);
+  addAudit('shift',`Shift ended — Duration: ${h}h ${m}m — Orders: ${myOrders.length} — Revenue: Ksh ${revenue}`);
+  if(!silent) alert(`✅ Shift ended!\nDuration: ${h}h ${m}m\nOrders: ${myOrders.length}\nRevenue: Ksh ${revenue.toFixed(2)}`);
+}
+
+function updateShiftClock(){
+  if(!SESSION.shiftStart) return;
+  const diff=Math.floor((new Date()-SESSION.shiftStart)/1000);
+  const h=String(Math.floor(diff/3600)).padStart(2,'0');
+  const m=String(Math.floor((diff%3600)/60)).padStart(2,'0');
+  const s=String(diff%60).padStart(2,'0');
+  const val=`${h}:${m}:${s}`;
+  ['shiftClock','shiftTimerLarge'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=val;});
+}
+
+// ─────────────────────────────────────────────────────────
+// STOCK
+// ─────────────────────────────────────────────────────────
+function refreshStock(){
+  const r=SESSION.user.role;
+  const bId=currentBranchId();
+  showEl('ownerAddStockCard', r==='owner');
+  showEl('masterStockCard', r==='owner'||r==='manager');
+  showEl('counterStockCard', r==='counter');
+  showEl('waiterStockNotice', r==='waiter');
+  if(r==='owner') renderSuppliersDropdown();
+  document.getElementById('branchStockLabel').textContent=SESSION.branch.name;
+  renderMasterStock(branchStock(bId));
+  renderCounterStock(branchStock(bId));
+}
+
+function renderSuppliersDropdown(){
+  const sel=document.getElementById('si-supplier');
+  if(sel) sel.innerHTML='<option value="">— Select Supplier —</option>'+DB.suppliers.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+function addStockItem(){
+  const name=document.getElementById('si-name').value.trim();
+  const cat=document.getElementById('si-cat').value;
+  const qty=parseInt(document.getElementById('si-qty').value)||0;
+  const cost=parseFloat(document.getElementById('si-cost').value)||0;
+  const price=parseFloat(document.getElementById('si-price').value)||0;
+  const supplierId=document.getElementById('si-supplier').value;
+  if(!name||qty<=0) return showAlert('stockErr','Enter item name and valid quantity.','err');
+  const bId=currentBranchId();
+  const existing=DB.stock.find(s=>s.name.toLowerCase()===name.toLowerCase()&&s.branchId===bId);
+  if(existing){
+    existing.totalReceived+=qty; existing.managerQty+=qty; existing.remaining+=qty;
+    if(cost) existing.cost=cost; if(price) existing.price=price;
+  } else {
+    DB.stock.push({id:uid(),branchId:bId,name,category:cat,totalReceived:qty,managerQty:qty,counterQty:0,sold:0,remaining:qty,cost,price,supplierId});
+  }
+  addAudit('stock',`Stock received: ${qty}x ${name}`);
+  showAlert('stockOk',`✅ ${qty}x ${name} recorded!`,'ok');
+  ['si-name','si-qty','si-cost','si-price'].forEach(id=>document.getElementById(id).value='');
+  renderMasterStock(branchStock(bId));
+}
+
+let _stockFilter='';
+function filterStock(v){ _stockFilter=v.toLowerCase(); renderMasterStock(branchStock(currentBranchId())); }
+
+function renderMasterStock(items){
+  const filtered=items.filter(s=>s.name.toLowerCase().includes(_stockFilter)||s.category.toLowerCase().includes(_stockFilter));
+  document.getElementById('masterStockTbody').innerHTML = filtered.length
+    ? filtered.map(s=>{
+        const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+        const statusBadge=pct>50?'<span class="badge badge-green">Good</span>':pct>20?'<span class="badge badge-gold">Low</span>':'<span class="badge badge-red">Critical</span>';
+        return `<tr>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge badge-blue">${s.category}</span></td>
+          <td class="mono">${s.totalReceived}</td>
+          <td class="mono">${s.managerQty}</td>
+          <td class="mono">${s.counterQty}</td>
+          <td class="mono">${s.sold}</td>
+          <td class="mono fw-bold" style="color:${pct<20?'var(--red)':pct<50?'var(--gold)':'var(--green)'}">${s.remaining}</td>
+          <td class="mono">Ksh ${s.price.toFixed(2)}</td>
+          <td class="mono text-gold">Ksh ${(s.remaining*s.price).toFixed(2)}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="10" class="text-muted">No stock found.</td></tr>';
+}
+
+function renderCounterStock(items){
+  const counterItems=(items||[]).filter(s=>s.counterQty>0||s.sold>0);
+  document.getElementById('counterStockTbody').innerHTML = counterItems.length
+    ? counterItems.map(s=>{
+        const pct=s.counterQty>0?Math.round((s.counterQty/(s.counterQty+s.sold||1))*100):0;
+        const cls=pct>50?'prog-green':pct>20?'prog-gold':'prog-red';
+        return `<tr>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge badge-blue">${s.category}</span></td>
+          <td class="mono">${s.counterQty+s.sold}</td>
+          <td class="mono fw-bold">${s.counterQty}</td>
+          <td class="mono">${s.sold}</td>
+          <td style="min-width:120px"><div class="prog-bar"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div><div class="fs-11 text-muted">${pct}% remaining</div></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="6" class="text-muted">No stock allocated yet.</td></tr>';
+}
+
+function exportCSV(){
+  const bId=currentBranchId();
+  const items=branchStock(bId);
+  const header=['Item','Category','Received','Manager','Counter','Sold','Remaining','Cost','Price','Value'];
+  const rows=items.map(s=>[s.name,s.category,s.totalReceived,s.managerQty,s.counterQty,s.sold,s.remaining,s.cost,s.price,(s.remaining*s.price).toFixed(2)]);
+  const csv=[header,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`stock_${SESSION.branch.name.replace(/\s+/g,'_')}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+}
+
+// ─────────────────────────────────────────────────────────
+// TRANSFERS
+// ─────────────────────────────────────────────────────────
+function refreshTransfers(){
+  const r=SESSION.user.role;
+  showEl('managerTransferCard', r==='manager');
+  showEl('ownerTransferCard', r==='owner');
+  if(r==='manager'){
+    const bId=currentBranchId();
+    const bStock=branchStock(bId).filter(s=>s.managerQty>0);
+    document.getElementById('tr-item').innerHTML = bStock.map(s=>`<option value="${s.id}">${s.name} (Manager: ${s.managerQty})</option>`).join('') || '<option>No stock available</option>';
+  }
+  if(r==='owner'){
+    // Populate branch selector
+    const brSel=document.getElementById('otr-branch');
+    if(brSel){
+      brSel.innerHTML=DB.branches.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+      populateOwnerTransferItems();
+    }
+  }
+  renderTransferLog();
+}
+
+function populateOwnerTransferItems(){
+  const branchId=document.getElementById('otr-branch')?.value;
+  if(!branchId) return;
+  // Owner transfers from main stock (any branch stock that has managerQty)
+  const allStock=DB.stock.filter(s=>s.managerQty>0);
+  const sel=document.getElementById('otr-item');
+  if(sel) sel.innerHTML=allStock.length
+    ? allStock.map(s=>{
+        const br=DB.branches.find(b=>b.id===s.branchId);
+        return `<option value="${s.id}">${s.name} — ${br?.name} (${s.managerQty} available)</option>`;
+      }).join('')
+    : '<option>No stock with manager quantity available</option>';
+}
+
+function doOwnerTransfer(){
+  if(SESSION.user.role!=='owner') return;
+  const itemId=document.getElementById('otr-item').value;
+  const qty=parseInt(document.getElementById('otr-qty').value)||0;
+  const toBranchId=document.getElementById('otr-branch').value;
+  const item=DB.stock.find(s=>s.id===itemId);
+  if(!item) return showAlert('otrErr','Select a valid stock item.','err');
+  if(qty<=0||qty>item.managerQty) return showAlert('otrErr',`Cannot transfer ${qty}. Only ${item.managerQty} available in manager stock.`,'err');
+  const toBranch=DB.branches.find(b=>b.id===toBranchId);
+  // Find or create matching stock in target branch
+  let targetStock=DB.stock.find(s=>s.branchId===toBranchId&&s.name===item.name);
+  if(!targetStock){
+    targetStock={id:uid(),branchId:toBranchId,name:item.name,category:item.category,
+      totalReceived:0,managerQty:0,counterQty:0,sold:0,remaining:0,cost:item.cost,price:item.price,supplierId:item.supplierId};
+    DB.stock.push(targetStock);
+  }
+  // Deduct from source, add to target manager
+  item.managerQty-=qty; item.remaining-=qty;
+  targetStock.managerQty+=qty; targetStock.remaining+=qty; targetStock.totalReceived+=qty;
+  DB.transfers.push({id:uid(),time:ts(),branchId:toBranchId,item:item.name,qty,
+    from:'Owner ('+DB.branches.find(b=>b.id===item.branchId)?.name+')',
+    to:'Branch Manager ('+toBranch?.name+')',by:SESSION.user.name});
+  addAudit('transfer',`Owner transferred ${qty}x ${item.name} → ${toBranch?.name} Manager`);
+  showAlert('otrOk',`✅ ${qty}x ${item.name} transferred to ${toBranch?.name}!`,'ok');
+  document.getElementById('otr-qty').value='';
+  populateOwnerTransferItems();
+  renderTransferLog();
+  refreshDashboard();
+}
+
+function doTransfer(){
+  const itemId=document.getElementById('tr-item').value;
+  const qty=parseInt(document.getElementById('tr-qty').value)||0;
+  const item=DB.stock.find(s=>s.id===itemId);
+  if(!item) return;
+  if(qty<=0||qty>item.managerQty) return showAlert('trErr',`Cannot transfer ${qty}. Manager holds ${item.managerQty}.`,'err');
+  item.managerQty-=qty; item.counterQty+=qty;
+  DB.transfers.push({id:uid(),time:ts(),branchId:item.branchId,item:item.name,qty,from:'Manager',to:'Counter Attendant',by:SESSION.user.name});
+  addAudit('transfer',`Transferred ${qty}x ${item.name} → Counter Attendant`);
+  showAlert('trOk',`✅ ${qty}x ${item.name} transferred to Counter!`,'ok');
+  document.getElementById('tr-qty').value='';
+  renderTransferLog();
+  refreshDashboard();
+}
+
+function renderTransferLog(){
+  const rows=DB.transfers.slice().reverse();
+  document.getElementById('trLogTbody').innerHTML = rows.length
+    ? rows.map(t=>{
+        const br=DB.branches.find(b=>b.id===t.branchId);
+        return `<tr>
+          <td class="mono fs-11 text-muted">${t.time}</td>
+          <td><span class="badge badge-purple">${br?.name||'—'}</span></td>
+          <td><strong>${t.item}</strong></td>
+          <td class="mono">${t.qty}</td>
+          <td><span class="badge badge-gold">${t.from}</span></td>
+          <td><span class="badge badge-blue">${t.to}</span></td>
+          <td>${t.by}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="7" class="text-muted">No transfers yet.</td></tr>';
+  document.getElementById('trCount').textContent=`${rows.length} records`;
+}
+
+// ─────────────────────────────────────────────────────────
+// SUPPLIERS
+// ─────────────────────────────────────────────────────────
+function refreshSuppliers(){ renderSupplierTable(); }
+
+function addSupplier(){
+  const name=document.getElementById('sup-name').value.trim();
+  if(!name) return;
+  DB.suppliers.push({
+    id:uid(), name,
+    contact:document.getElementById('sup-contact').value.trim(),
+    phone:document.getElementById('sup-phone').value.trim(),
+    email:document.getElementById('sup-email').value.trim(),
+    products:document.getElementById('sup-products').value.trim(),
+    terms:document.getElementById('sup-terms').value,
+    notes:document.getElementById('sup-notes').value.trim()
+  });
+  addAudit('stock',`Supplier added: ${name}`);
+  showAlert('supOk',`✅ Supplier "${name}" added!`,'ok');
+  ['sup-name','sup-contact','sup-phone','sup-email','sup-products','sup-notes'].forEach(id=>document.getElementById(id).value='');
+  renderSupplierTable();
+  renderSuppliersDropdown();
+}
+
+function renderSupplierTable(){
+  document.getElementById('supTbody').innerHTML = DB.suppliers.length
+    ? DB.suppliers.map(s=>`<tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.contact}</td>
+        <td><a href="tel:${s.phone}" style="color:var(--blue)">${s.phone}</a></td>
+        <td><a href="mailto:${s.email}" style="color:var(--blue)">${s.email}</a></td>
+        <td class="text-muted fs-12">${s.products}</td>
+        <td><span class="badge badge-teal">${s.terms}</span></td>
+        <td>
+          <button class="btn btn-ghost btn-xs" onclick="viewSupplier('${s.id}')">View</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteSupplier('${s.id}')">Delete</button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="text-muted">No suppliers yet.</td></tr>';
+  document.getElementById('supCount').textContent=`${DB.suppliers.length} suppliers`;
+}
+
+function viewSupplier(id){
+  const s=DB.suppliers.find(x=>x.id===id);
+  if(!s) return;
+  openModal(`🏭 ${s.name}`,`
+    <div style="display:grid;gap:12px;">
+      <div><div class="f-label">Contact Person</div><div>${s.contact||'—'}</div></div>
+      <div><div class="f-label">Phone</div><div><a href="tel:${s.phone}" style="color:var(--blue)">${s.phone||'—'}</a></div></div>
+      <div><div class="f-label">Email</div><div><a href="mailto:${s.email}" style="color:var(--blue)">${s.email||'—'}</a></div></div>
+      <div><div class="f-label">Products</div><div>${s.products||'—'}</div></div>
+      <div><div class="f-label">Payment Terms</div><div><span class="badge badge-teal">${s.terms}</span></div></div>
+      <div><div class="f-label">Notes</div><div class="text-muted fs-12">${s.notes||'—'}</div></div>
+    </div>`);
+}
+
+function deleteSupplier(id){
+  if(!confirm('Delete this supplier?')) return;
+  DB.suppliers=DB.suppliers.filter(s=>s.id!==id);
+  saveDB();
+  renderSupplierTable();
+  renderSuppliersDropdown();
+}
+
+// ─────────────────────────────────────────────────────────
+// ORDERS
+// ─────────────────────────────────────────────────────────
+function refreshOrders(){
+  const r=SESSION.user.role;
+  showEl('waiterOrderCard', r==='waiter');
+  showEl('counterIncomingCard', r==='counter');
+
+  if(r==='waiter'){
+    const bId=currentBranchId();
+    const avail=branchStock(bId).filter(s=>s.counterQty>0);
+    document.getElementById('ord-item').innerHTML = avail.length
+      ? avail.map(s=>`<option value="${s.id}">${s.name} — Ksh ${s.price.toFixed(2)}</option>`).join('')
+      : '<option>No items at counter</option>';
+  }
+
+  const bId=currentBranchId();
+  const pending=DB.orders.filter(o=>o.branchId===bId&&o.status==='pending').length;
+  const pcb=document.getElementById('pendingCountBadge');
+  if(pcb) pcb.textContent=`${pending} Pending`;
+  renderOrders();
+}
+
+function addToCart(){
+  const stockId=document.getElementById('ord-item').value;
+  const qty=parseInt(document.getElementById('ord-qty').value)||1;
+  const notes=document.getElementById('ord-notes').value;
+  const stock=DB.stock.find(s=>s.id===stockId);
+  if(!stock) return;
+  SESSION.cart.push({stockId,name:stock.name,qty,price:stock.price,notes});
+  document.getElementById('ord-qty').value='1';
+  document.getElementById('ord-notes').value='';
+  renderCart();
+}
+
+function removeCartItem(i){ SESSION.cart.splice(i,1); renderCart(); }
+
+function renderCart(){
+  const total=SESSION.cart.reduce((a,c)=>a+c.qty*c.price,0);
+  document.getElementById('cartPreview').innerHTML = SESSION.cart.length
+    ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px;">
+        <div class="fs-11 text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Order Items</div>
+        ${SESSION.cart.map((c,i)=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);">
+            <span class="fs-12">${c.qty}× ${c.name} ${c.notes?'<span class="text-muted fs-11">('+c.notes+')</span>':''}</span>
+            <span style="display:flex;align-items:center;gap:8px;"><span class="text-gold fs-12 fw-bold">Ksh ${(c.qty*c.price).toFixed(2)}</span>
+            <button onclick="removeCartItem(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;">✕</button></span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:15px;font-weight:700;">
+          <span>Total</span><span class="text-gold">Ksh ${total.toFixed(2)}</span>
+        </div>
+      </div>`
+    : '';
+}
+
+function submitOrder(){
+  const table=document.getElementById('ord-table').value.trim();
+  if(!table) return showAlert('ordErr','Enter table/customer name.','err');
+  if(!SESSION.cart.length) return showAlert('ordErr','Add at least one item.','err');
+
+  for(const ci of SESSION.cart){
+    const s=DB.stock.find(x=>x.id===ci.stockId);
+    if(!s||s.counterQty<ci.qty){ showAlert('ordErr',`Not enough "${ci.name}" at counter (${s?.counterQty||0} available).`,'err'); return; }
+  }
+
+  const bId=currentBranchId();
+  const total=SESSION.cart.reduce((a,c)=>a+c.qty*c.price,0);
+  const order={
+    id:++SESSION.orderIdCounter,branchId:bId,table,
+    waiter:SESSION.user.name,waiterId:SESSION.user.id,
+    items:[...SESSION.cart],total,status:'pending',time:ts()
+  };
+  DB.orders.push(order);
+  SESSION.cart=[];
+  renderCart();
+  document.getElementById('ord-table').value='';
+
+  addAudit('order',`Order #${order.id} placed — ${table} — Ksh ${total.toFixed(2)}`);
+  showAlert('ordOk',`✅ Order #${order.id} sent to counter!`,'ok');
+  renderOrders();
+  refreshDashboard();
+}
+
+function dispatchOrder(orderId){
+  const o=DB.orders.find(x=>x.id==orderId);
+  if(!o||o.status!=='pending') return;
+  // Deduct stock — match by stockId first, fall back to name+branchId for new-branch orders
+  for(const ci of o.items){
+    let s=DB.stock.find(x=>x.id===ci.stockId);
+    if(!s) s=DB.stock.find(x=>x.name===ci.name&&x.branchId===o.branchId);
+    if(s){
+      s.counterQty=Math.max(0,s.counterQty-ci.qty);
+      s.sold+=ci.qty;
+      s.remaining=Math.max(0,s.remaining-ci.qty);
+    }
+  }
+  o.status='dispatched';
+  o.dispatchedAt=ts();
+  o.dispatchedBy=SESSION.user.name;
+  addAudit('order',`Order #${o.id} dispatched to ${o.waiter}`);
+  saveDB();
+  renderOrders();
+  renderCounterStock(branchStock(currentBranchId()));
+  refreshDashboard();
+  // Show dispatch receipt
+  showOrderReceipt(o.id,'dispatched');
+}
+
+function markPaid(orderId){
+  const o=DB.orders.find(x=>x.id==orderId);
+  if(!o) return;
+  o.status='paid'; o.paidAt=ts();
+  addAudit('order',`Order #${o.id} payment collected — Ksh ${o.total.toFixed(2)}`);
+  saveDB();
+  renderOrders(); refreshDashboard();
+  showOrderReceipt(o.id,'paid');
+}
+
+function cancelOrder(orderId){
+  if(!confirm('Cancel this order?')) return;
+  const o=DB.orders.find(x=>x.id==orderId);
+  if(o){ o.status='cancelled'; addAudit('order',`Order #${orderId} cancelled`); saveDB(); }
+  renderOrders(); refreshDashboard();
+}
+
+// ─── Receipt Builder ───────────────────────────────────────
+function buildReceiptHTML(o, statusLabel){
+  const br=DB.branches.find(b=>b.id===o.branchId);
+  const statusColor=statusLabel==='DISPATCHED'?'var(--blue)':statusLabel==='PAID'?'var(--green)':'var(--gold)';
+  const itemsHTML=o.items.map(i=>`
+    <div class="receipt-row">
+      <span>${i.qty}× ${i.name}</span>
+      <span>Ksh ${(i.qty*i.price).toFixed(2)}</span>
+    </div>`).join('');
+  return `
+    <div class="receipt" id="receiptContent">
+      <div class="receipt-logo">
+        <div class="receipt-logo-title">BartracKE</div>
+        <div class="receipt-logo-sub">Complete Bar & Restaurant Management</div>
+      </div>
+      <hr class="receipt-divider">
+      <div class="receipt-row muted"><span>Branch</span><span>${br?.name||'—'}</span></div>
+      <div class="receipt-row muted"><span>Order #</span><span style="font-weight:800;">#${o.id}</span></div>
+      <div class="receipt-row muted"><span>Table / Customer</span><span>${o.table}</span></div>
+      <div class="receipt-row muted"><span>Waiter</span><span>${o.waiter}</span></div>
+      <div class="receipt-row muted"><span>Time</span><span>${o.time}</span></div>
+      <hr class="receipt-divider">
+      <div class="receipt-row header"><span>Item</span><span>Amount</span></div>
+      ${itemsHTML}
+      <hr class="receipt-divider">
+      <div class="receipt-row total"><span>TOTAL</span><span>Ksh ${o.total.toFixed(2)}</span></div>
+      <div class="receipt-status">
+        <span style="background:${statusColor};color:#fff;padding:4px 16px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1.5px;">${statusLabel}</span>
+      </div>
+      ${statusLabel==='PAID'&&o.paidAt?`<div class="receipt-row muted" style="justify-content:center;">Paid at: ${o.paidAt}</div>`:''}
+      ${statusLabel==='DISPATCHED'&&o.dispatchedAt?`<div class="receipt-row muted" style="justify-content:center;">Dispatched at: ${o.dispatchedAt}</div>`:''}
+      <hr class="receipt-divider">
+      <div class="receipt-footer">Thank you for choosing ${br?.name||'BartracKE'}<br>Powered by BartracKE</div>
+    </div>`;
+}
+
+function showOrderReceipt(orderId, trigger){
+  // Normalise orderId — could be number or string
+  const oid = parseInt(orderId) || orderId;
+  const o = DB.orders.find(x => x.id === oid || String(x.id) === String(orderId));
+  if(!o) return;
+  const label = trigger==='paid'?'PAID'
+    : trigger==='dispatched'?'DISPATCHED'
+    : trigger==='cancelled'?'CANCELLED'
+    : trigger==='pending'?'PENDING'
+    : 'RECEIPT';
+  const html = buildReceiptHTML(o, label);
+  // Use o.id (the canonical numeric ID) for the print button to avoid type mismatch
+  openModal(`🧾 Receipt — Order #${o.id}`,`
+    <div>
+      ${html}
+      <div style="display:flex;gap:8px;margin-top:16px;" class="no-print">
+        <button class="btn btn-navy" style="flex:1;" onclick="printReceipt(${o.id},'${label}')">🖨️ Print Receipt</button>
+        <button class="btn btn-ghost" style="width:auto;" onclick="closeModal()">Close</button>
+      </div>
+    </div>`);
+}
+
+function printReceipt(orderId, label){
+  const o=DB.orders.find(x=>x.id==orderId||String(x.id)===String(orderId));
+  if(!o) return;
+  const printArea=document.getElementById('receiptPrintArea');
+  printArea.innerHTML=buildReceiptHTML(o,label||'RECEIPT');
+  printArea.style.display='block';
+  window.print();
+  printArea.style.display='none';
+  printArea.innerHTML='';
+}
+
+// Allow viewing receipt for any existing order from the card
+function viewOrderReceipt(orderId){
+  const o=DB.orders.find(x=>x.id==orderId);
+  if(!o) return;
+  // Pass the actual status string so showOrderReceipt maps it correctly
+  const trigger=o.status==='paid'?'paid':o.status==='dispatched'?'dispatched':o.status==='cancelled'?'cancelled':'pending';
+  showOrderReceipt(orderId, trigger);
+}
+
+function renderOrders(){
+  const r=SESSION.user.role;
+  const bId=currentBranchId();
+  const filter=document.getElementById('orderFilterSel')?.value||'all';
+  let orders=DB.orders.filter(o=>o.branchId===bId);
+  if(r==='waiter') orders=orders.filter(o=>o.waiterId===SESSION.user.id);
+  if(filter!=='all') orders=orders.filter(o=>o.status===filter);
+
+  // update pending badge
+  const pending=DB.orders.filter(o=>o.branchId===bId&&o.status==='pending').length;
+  const pcb=document.getElementById('pendingCountBadge');
+  if(pcb) pcb.textContent=`${pending} Pending`;
+  const nb=document.getElementById('navOrderBadge');
+  if(nb){ nb.textContent=pending; nb.style.display=pending>0?'inline-block':'none'; }
+  const notif=document.getElementById('notifCount');
+  if(notif) notif.textContent=pending;
+
+  document.getElementById('ordersGrid').innerHTML = orders.length
+    ? orders.slice().reverse().map(o=>{
+        const statusBadge={
+          pending:'<span class="badge badge-gold">⏳ Pending Dispatch</span>',
+          dispatched:'<span class="badge badge-blue">🚀 Awaiting Payment</span>',
+          paid:'<span class="badge badge-green">✅ Paid</span>',
+          cancelled:'<span class="badge badge-red">❌ Cancelled</span>'
+        }[o.status]||'';
+
+        let actions='';
+        // Counter: dispatch pending orders
+        if(r==='counter'&&o.status==='pending'){
+          actions=`
+            <button class="btn btn-blue btn-sm" onclick="event.stopPropagation();dispatchOrder(${o.id})" style="font-weight:800;">📤 Dispatch</button>
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();cancelOrder(${o.id})" title="Cancel order">✕</button>`;
+        }
+        // Waiter/Manager/Owner: collect payment on dispatched
+        if((r==='waiter'||r==='manager'||r==='owner')&&o.status==='dispatched'){
+          actions=`<button class="btn btn-success btn-sm" onclick="event.stopPropagation();markPaid(${o.id})">💰 Mark Paid</button>`;
+        }
+        // Receipt button for dispatched/paid
+        if(o.status==='dispatched'||o.status==='paid'){
+          actions+=`<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewOrderReceipt(${o.id})" title="View Receipt">🧾 Receipt</button>`;
+        }
+        // Owner/Manager can cancel pending
+        if((r==='owner'||r==='manager')&&o.status==='pending'){
+          actions=`<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();cancelOrder(${o.id})">✕ Cancel</button>`;
+        }
+
+        return `<div class="order-card ${o.status}" style="cursor:pointer;" onclick="if(!event.target.closest('button'))viewOrderDetail(${o.id})">
+          <div class="oc-head">
+            <div class="oc-num">#${o.id}</div>${statusBadge}
+          </div>
+          <div class="oc-meta">🪑 ${o.table} · 🍽️ ${o.waiter}</div>
+          <ul class="oc-items">${o.items.map(i=>`<li><span>${i.qty}× ${i.name}</span><span class="text-muted">Ksh ${(i.qty*i.price).toFixed(2)}</span></li>`).join('')}</ul>
+          <div class="oc-total">Ksh ${o.total.toFixed(2)}</div>
+          <div class="fs-11 text-muted" style="margin-bottom:10px;">${o.time}</div>
+          <div class="oc-actions">${actions}</div>
+        </div>`;
+      }).join('')
+    : '<p class="text-muted fs-12" style="padding:12px 0;">No orders found.</p>';
+}
+
+function viewOrderDetail(orderId){
+  const o=DB.orders.find(x=>x.id==orderId);
+  if(!o) return;
+  const br=DB.branches.find(b=>b.id===o.branchId);
+  const r=SESSION.user.role;
+  const statusColor={pending:'var(--gold)',dispatched:'var(--blue)',paid:'var(--green)',cancelled:'var(--red)'}[o.status]||'var(--text-muted)';
+  const statusLabel={pending:'⏳ Pending Dispatch',dispatched:'🚀 Awaiting Payment',paid:'✅ Paid',cancelled:'❌ Cancelled'}[o.status]||o.status;
+  const itemsHTML=o.items.map(i=>`
+    <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;">
+      <span>${i.qty}× ${i.name}</span>
+      <span class="text-gold fw-bold">Ksh ${(i.qty*i.price).toFixed(2)}</span>
+    </div>`).join('');
+
+  let actionBtns='';
+  if(r==='counter'&&o.status==='pending'){
+    actionBtns=`<button class="btn btn-blue" style="flex:1;" onclick="closeModal();dispatchOrder(${o.id})">📤 Dispatch Order</button>
+                <button class="btn btn-danger btn-sm" onclick="closeModal();cancelOrder(${o.id})">✕ Cancel</button>`;
+  }
+  if((r==='waiter'||r==='manager'||r==='owner')&&o.status==='dispatched'){
+    actionBtns=`<button class="btn btn-success" style="flex:1;" onclick="closeModal();markPaid(${o.id})">💰 Mark as Paid</button>
+                <button class="btn btn-ghost btn-sm" onclick="closeModal();viewOrderReceipt(${o.id})">🧾 Receipt</button>`;
+  }
+  if(o.status==='paid'){
+    actionBtns=`<button class="btn btn-navy" style="flex:1;" onclick="closeModal();viewOrderReceipt(${o.id})">🧾 View & Print Receipt</button>`;
+  }
+  if((r==='owner'||r==='manager')&&o.status==='pending'){
+    actionBtns=`<button class="btn btn-danger btn-sm" onclick="closeModal();cancelOrder(${o.id})">✕ Cancel Order</button>`;
+  }
+
+  openModal(`🧾 Order #${o.id}`,`
+    <div style="display:grid;gap:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Status</div>
+          <span style="background:${statusColor};color:#fff;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:1px;">${statusLabel}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;">Total</div>
+          <div style="font-size:26px;font-weight:900;color:#9a6e10;">Ksh ${o.total.toFixed(2)}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div class="f-label">🏢 Branch</div><div style="font-size:13px;">${br?.name||'—'}</div></div>
+        <div><div class="f-label">🪑 Table / Customer</div><div style="font-size:13px;">${o.table}</div></div>
+        <div><div class="f-label">🍽️ Waiter</div><div style="font-size:13px;">${o.waiter}</div></div>
+        <div><div class="f-label">🕐 Ordered At</div><div style="font-size:12px;font-family:'JetBrains Mono',monospace;">${o.time}</div></div>
+        ${o.dispatchedAt?`<div><div class="f-label">📤 Dispatched</div><div style="font-size:12px;font-family:'JetBrains Mono',monospace;">${o.dispatchedAt}</div></div>`:''}
+        ${o.paidAt?`<div><div class="f-label">💰 Paid At</div><div style="font-size:12px;font-family:'JetBrains Mono',monospace;">${o.paidAt}</div></div>`:''}
+      </div>
+      <div>
+        <div class="f-label" style="margin-bottom:6px;">🛒 Items Ordered</div>
+        ${itemsHTML}
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:15px;font-weight:900;">
+          <span>Total</span><span style="color:#9a6e10;">Ksh ${o.total.toFixed(2)}</span>
+        </div>
+      </div>
+      ${actionBtns?`<div style="display:flex;gap:8px;flex-wrap:wrap;">${actionBtns}</div>`:''}
+    </div>`);
+}
+
+// ─────────────────────────────────────────────────────────
+// SHIFTS
+// ─────────────────────────────────────────────────────────
+function refreshShifts(){
+  document.getElementById('shiftsTbody').innerHTML = DB.shifts.length
+    ? DB.shifts.slice().reverse().map(s=>{
+        const br=DB.branches.find(b=>b.id===s.branchId);
+        const isActive=s.end===null;
+        return `<tr>
+          <td><strong>${s.name}</strong></td>
+          <td><span class="badge badge-${s.role==='waiter'?'blue':s.role==='counter'?'teal':'gold'}">${s.role}</span></td>
+          <td class="fs-12 text-muted">${br?.name||'—'}</td>
+          <td class="mono fs-12">${s.start}</td>
+          <td class="mono fs-12">${s.end||'<span class="text-green fw-bold">Active</span>'}</td>
+          <td class="mono">${s.duration}</td>
+          <td class="mono">${s.orders}</td>
+          <td class="mono text-gold">${s.revenue?'Ksh '+s.revenue.toFixed(2):'—'}</td>
+          <td>${isActive?'—':`<button class="btn btn-ghost btn-xs" onclick="viewShiftReport('${s.id}')">📄 View</button>`}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="9" class="text-muted">No shift records.</td></tr>';
+}
+
+function viewShiftReport(id){
+  const s=DB.shifts.find(x=>x.id===id);
+  if(!s) return;
+  const br=DB.branches.find(b=>b.id===s.branchId);
+  openModal(`📋 Shift Report — ${s.name}`,`
+    <div style="display:grid;gap:12px;">
+      <div><div class="f-label">Staff</div><div>${s.name} (${s.role})</div></div>
+      <div><div class="f-label">Branch</div><div>${br?.name||'—'}</div></div>
+      <div><div class="f-label">Start</div><div class="mono">${s.start}</div></div>
+      <div><div class="f-label">End</div><div class="mono">${s.end||'Active'}</div></div>
+      <div><div class="f-label">Duration</div><div class="mono text-gold">${s.duration}</div></div>
+      <div><div class="f-label">Orders Handled</div><div class="mono">${s.orders}</div></div>
+      <div><div class="f-label">Revenue Collected</div><div class="mono text-green">Ksh ${s.revenue?.toFixed(2)||'0.00'}</div></div>
+    </div>`);
+}
+
+// ─────────────────────────────────────────────────────────
+// STAFF
+// ─────────────────────────────────────────────────────────
+function refreshStaff(){
+  const isOwner=SESSION.user.role==='owner';
+  const sc=document.getElementById('addStaffCard');
+  if(sc) sc.style.display=isOwner?'block':'none';
+  const stSel=document.getElementById('st-branch');
+  stSel.innerHTML=DB.branches.map(b=>`<option value="${b.id}">${b.name}</option>`).join('');
+  renderStaffCards();
+}
+
+function addStaff(){
+  if(SESSION.user.role!=='owner') return showAlert('stErr','❌ Only the Owner can register staff members.','err');
+  const name=document.getElementById('st-name').value.trim();
+  const email=document.getElementById('st-email').value.trim().toLowerCase();
+  const phone=document.getElementById('st-phone').value.trim();
+  const password=document.getElementById('st-pass').value;
+  const role=document.getElementById('st-role').value;
+  const branchId=document.getElementById('st-branch').value;
+  if(!name||!email||!phone||!password) return showAlert('stErr','Fill all required fields.','err');
+  if(!isEmail(email)) return showAlert('stErr','Enter a valid email address.','err');
+  if(!normalizeKenyanPhone(phone)) return showAlert('stErr','Enter a valid Kenyan phone number.','err');
+  if(DB.users.find(u=>u.email===email)) return showAlert('stErr','Email already registered.','err');
+  DB.users.push({id:uid(),name,username:email,email,phone:normalizeKenyanPhone(phone),password,role,branchId,active:true});
+  addAudit('auth',`Staff registered: ${name} (${role})`);
+  // Create Firebase Auth account so they can authenticate with Firestore
+  _fbCreateAuthUser(email, password, name);
+  saveDB();
+  showAlert('stOk',`✅ ${name} registered! They can log in with ${email} or ${normalizeKenyanPhone(phone)}.`,'ok');
+  ['st-name','st-email','st-phone','st-pass'].forEach(id=>document.getElementById(id).value='');
+  renderStaffTable();
+}
+
+function renderStaffCards(){
+  const isOwner=SESSION.user.role==='owner';
+  const users=isOwner?DB.users:DB.users.filter(u=>u.branchId===currentBranchId());
+  document.getElementById('staffCount').textContent=`${users.length} member${users.length!==1?'s':''}`;
+  const roleBadgeMap={owner:'badge-gold',manager:'badge-gold',counter:'badge-teal',waiter:'badge-blue'};
+  const roleColors={owner:'role-owner',manager:'role-manager',counter:'role-counter',waiter:'role-waiter'};
+  const avatarColors={owner:'linear-gradient(135deg,var(--gold),var(--gold2))',manager:'linear-gradient(135deg,var(--gold),#c47a10)',counter:'linear-gradient(135deg,var(--teal),#0dcfb8)',waiter:'linear-gradient(135deg,var(--blue),#4a8fe8)'};
+  document.getElementById('staffCardsGrid').innerHTML = users.length
+    ? users.map(u=>{
+        const br=DB.branches.find(b=>b.id===u.branchId);
+        const roleBadge=roleBadgeMap[u.role]||'badge-gray';
+        const roleClass=roleColors[u.role]||'';
+        const avatarBg=avatarColors[u.role]||'linear-gradient(135deg,var(--navy2),var(--navy3))';
+        const initials=u.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        const myOrders=DB.orders.filter(o=>o.waiterId===u.id);
+        const myShifts=DB.shifts.filter(s=>s.userId===u.id);
+        return `<div class="staff-card ${roleClass}" onclick="viewStaffDetail('${u.id}')">
+          <div class="sc-avatar" style="background:${avatarBg}">${initials}</div>
+          <div class="sc-name">${u.name}</div>
+          <div class="sc-role"><span class="badge ${roleBadge}">${roleLabel(u.role)}</span> <span class="badge ${u.active?'badge-green':'badge-red'}" style="margin-left:2px;">${u.active?'Active':'Inactive'}</span></div>
+          <div class="sc-meta">📧 ${u.email||'—'}</div>
+          <div class="sc-meta">📞 ${u.phone||'—'}</div>
+          <div class="sc-meta">🏢 ${br?.name||'—'}</div>
+          <div class="sc-footer">
+            <div style="display:flex;gap:10px;">
+              <div style="text-align:center;">
+                <div style="font-size:15px;font-weight:800;color:var(--navy);">${myOrders.length}</div>
+                <div class="sc-hint">Orders</div>
+              </div>
+              <div style="text-align:center;">
+                <div style="font-size:15px;font-weight:800;color:var(--navy);">${myShifts.length}</div>
+                <div class="sc-hint">Shifts</div>
+              </div>
+            </div>
+            <div class="sc-actions" onclick="event.stopPropagation()">
+              ${u.role!=='owner'&&isOwner?`
+                <button class="btn btn-ghost btn-xs" title="Edit" onclick="openEditStaff('${u.id}')">✏️</button>
+                <button class="btn btn-danger btn-xs" title="Remove" onclick="deleteStaff('${u.id}')">🗑</button>
+              `:u.role!=='owner'?`<button class="btn btn-ghost btn-xs" onclick="toggleUserActive('${u.id}')">${u.active?'Deactivate':'Activate'}</button>`:''}
+            </div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<p class="text-muted fs-12" style="padding:12px 0;">No staff members found.</p>';
+}
+
+// keep old name as alias so any other callers still work
+function renderStaffTable(){ renderStaffCards(); }
+
+function viewStaffDetail(id){
+  const u=DB.users.find(x=>x.id===id);
+  if(!u) return;
+  const br=DB.branches.find(b=>b.id===u.branchId);
+  const roleBadge={owner:'badge-gold',manager:'badge-gold',counter:'badge-teal',waiter:'badge-blue'}[u.role]||'badge-gray';
+  const myOrders=DB.orders.filter(o=>o.waiterId===u.id);
+  const revenue=myOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const myShifts=DB.shifts.filter(s=>s.userId===u.id);
+  const isOwner=SESSION.user.role==='owner';
+  openModal(`👤 ${u.name}`,`
+    <div style="display:grid;gap:14px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0;">
+          ${u.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:700;">${u.name}</div>
+          <span class="badge ${roleBadge}" style="margin-top:4px;">${roleLabel(u.role)}</span>
+          <span class="badge ${u.active?'badge-green':'badge-red'}" style="margin-left:4px;">${u.active?'Active':'Inactive'}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Orders</div>
+          <div style="font-weight:700;font-size:20px;">${myOrders.length}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Revenue</div>
+          <div style="color:#9a6e10;font-weight:700;font-size:20px;">Ksh ${revenue.toFixed(0)}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><div class="f-label">📧 Email</div><div style="font-size:13px;">${u.email||'—'}</div></div>
+        <div><div class="f-label">📞 Phone</div><div style="font-size:13px;">${u.phone||'—'}</div></div>
+        <div><div class="f-label">🏢 Branch</div><div style="font-size:13px;">${br?.name||'—'}</div></div>
+        <div><div class="f-label">⏱ Shifts</div><div style="font-size:13px;">${myShifts.length} recorded</div></div>
+      </div>
+      ${isOwner&&u.role!=='owner'?`<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;">
+        <button class="btn btn-gold btn-sm" onclick="closeModal();openEditStaff('${u.id}')">✏️ Edit Details</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleUserActive('${u.id}');closeModal();renderStaffTable();">${u.active?'🔴 Deactivate':'🟢 Activate'}</button>
+        <button class="btn btn-danger btn-sm" onclick="closeModal();deleteStaff('${u.id}')">🗑 Remove</button>
+      </div>`:''}
+    </div>`);
+}
+
+function openEditStaff(id){
+  const u=DB.users.find(x=>x.id===id);
+  if(!u) return;
+  const branchOpts=DB.branches.map(b=>`<option value="${b.id}"${b.id===u.branchId?' selected':''}>${b.name}</option>`).join('');
+  openModal(`✏️ Edit Staff — ${u.name}`,`
+    <div style="display:grid;gap:14px;">
+      <div><label class="f-label">Full Name</label><input class="f-input" id="es-name" value="${u.name}" placeholder="Full name" /></div>
+      <div><label class="f-label">Email Address</label><input class="f-input" id="es-email" value="${u.email||''}" placeholder="email@example.com" /></div>
+      <div><label class="f-label">Phone Number</label><input class="f-input" id="es-phone" value="${u.phone||''}" placeholder="07XXXXXXXX" /></div>
+      <div><label class="f-label">Role</label>
+        <select class="f-select" id="es-role">
+          <option value="manager"${u.role==='manager'?' selected':''}>Manager</option>
+          <option value="counter"${u.role==='counter'?' selected':''}>Counter Attendant</option>
+          <option value="waiter"${u.role==='waiter'?' selected':''}>Waiter / Waitress</option>
+        </select>
+      </div>
+      <div><label class="f-label">Branch</label><select class="f-select" id="es-branch">${branchOpts}</select></div>
+      <div><label class="f-label">New Password <span class="text-muted fs-11">(leave blank to keep current)</span></label>
+        <input class="f-input" id="es-pass" type="password" placeholder="New password (optional)" />
+      </div>
+      <div class="alert alert-err" id="es-err"></div>
+      <div class="alert alert-ok" id="es-ok"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="saveEditStaff('${id}')">💾 Save Changes</button>
+        <button class="btn btn-ghost" style="width:auto;" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>`);
+}
+
+function saveEditStaff(id){
+  const u=DB.users.find(x=>x.id===id);
+  if(!u) return;
+  const name=document.getElementById('es-name').value.trim();
+  const email=document.getElementById('es-email').value.trim().toLowerCase();
+  const phone=document.getElementById('es-phone').value.trim();
+  const role=document.getElementById('es-role').value;
+  const branchId=document.getElementById('es-branch').value;
+  const newPass=document.getElementById('es-pass').value;
+  const showErr=msg=>{ const e=document.getElementById('es-err'); e.textContent=msg; e.classList.add('show'); };
+  if(!name) return showErr('Name is required.');
+  if(!isEmail(email)) return showErr('Enter a valid email address.');
+  const dupEmail=DB.users.find(x=>x.email===email&&x.id!==id);
+  if(dupEmail) return showErr('Email already used by another account.');
+  u.name=name; u.email=email; u.username=email;
+  if(phone){ const norm=normalizeKenyanPhone(phone); if(!norm) return showErr('Enter a valid Kenyan phone number.'); u.phone=norm; }
+  u.role=role; u.branchId=branchId;
+  if(newPass) u.password=newPass;
+  addAudit('auth',`Staff updated: ${name}`);
+  saveDB();
+  const ok=document.getElementById('es-ok'); ok.textContent='✅ Staff updated successfully!'; ok.classList.add('show');
+  setTimeout(()=>{ closeModal(); renderStaffTable(); },900);
+}
+
+function deleteStaff(id){
+  const u=DB.users.find(x=>x.id===id);
+  if(!u) return;
+  if(!confirm(`Remove "${u.name}" from the system? This cannot be undone.`)) return;
+  DB.users=DB.users.filter(x=>x.id!==id);
+  addAudit('auth',`Staff removed: ${u.name}`);
+  saveDB();
+  renderStaffTable();
+}
+
+function toggleUserActive(id){
+  const u=DB.users.find(x=>x.id===id);
+  if(u){ u.active=!u.active; addAudit('auth',`${u.name} account ${u.active?'activated':'deactivated'}`); saveDB(); renderStaffTable(); }
+}
+
+// ─────────────────────────────────────────────────────────
+// BRANCHES
+// ─────────────────────────────────────────────────────────
+function refreshBranches(){
+  const isOwner=SESSION.user.role==='owner';
+  const bc=document.getElementById('addBranchCard');
+  if(bc) bc.style.display=isOwner?'block':'none';
+  renderBranchCards();
+}
+
+function addBranch2(){
+  if(SESSION.user.role!=='owner') return showAlert('b2Ok','❌ Only the Owner can add branches.','err');
+  const name=document.getElementById('b2-name').value.trim();
+  const location=document.getElementById('b2-loc').value.trim();
+  const manager=document.getElementById('b2-mgr').value.trim();
+  const phone=document.getElementById('b2-phone').value.trim();
+  if(!name) return showAlert('b2Ok','Branch name is required.','err');
+  DB.branches.push({id:uid(),name,location,manager,phone});
+  addAudit('auth',`Branch added: ${name}`);
+  showAlert('b2Ok',`✅ Branch "${name}" added!`,'ok');
+  ['b2-name','b2-loc','b2-mgr','b2-phone'].forEach(id=>document.getElementById(id).value='');
+  renderBranchCards();
+  populateBranchSelector();
+}
+
+function renderBranchCards(){
+  const isOwner=SESSION.user.role==='owner';
+  document.getElementById('branchCards').innerHTML = DB.branches.map(b=>{
+    const bOrders=DB.orders.filter(o=>o.branchId===b.id);
+    const bRevenue=bOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+    const bStaff=DB.users.filter(u=>u.branchId===b.id).length;
+    const bStock=DB.stock.filter(s=>s.branchId===b.id).length;
+    const pending=bOrders.filter(o=>o.status==='pending').length;
+    return `<div class="card branch-card" style="margin:0;cursor:pointer;transition:transform 0.18s,box-shadow 0.18s;" onclick="viewBranchDetail('${b.id}')"
+        onmouseenter="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 36px rgba(13,27,62,0.16)'"
+        onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="bc-icon">🏢</div>
+          <div>
+            <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--navy);">${b.name}</div>
+            <div class="fs-12 text-muted" style="margin-top:2px;">📍 ${b.location||'No address set'}</div>
+          </div>
+        </div>
+        <span class="badge badge-green">Active</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Revenue</div>
+          <div class="text-gold fw-bold" style="font-size:16px;">Ksh ${bRevenue.toFixed(0)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Orders</div>
+          <div class="fw-bold" style="font-size:16px;">${bOrders.length}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Pending</div>
+          <div class="fw-bold" style="font-size:16px;color:${pending>0?'var(--red)':'var(--green)'};">${pending}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+        <div class="sc-meta">👤 ${b.manager||'Unassigned'}</div>
+        <div class="sc-meta">👥 ${bStaff} staff</div>
+        <div class="sc-meta">📦 ${bStock} items</div>
+        ${b.phone?`<div class="sc-meta">📞 ${b.phone}</div>`:''}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);" onclick="event.stopPropagation()">
+        <div style="display:flex;gap:6px;">
+          ${isOwner?`<button class="btn btn-ghost btn-xs" onclick="openEditBranch('${b.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="deleteBranch('${b.id}')">🗑</button>`:''}
+        </div>
+        <span class="fs-11 text-muted" style="display:flex;align-items:center;gap:4px;">View details <span style="font-size:13px;">→</span></span>
+      </div>
+    </div>`;
+  }).join('') || '<p class="text-muted fs-12" style="padding:12px;">No branches added yet.</p>';
+}
+
+function viewBranchDetail(id){
+  const b=DB.branches.find(x=>x.id===id);
+  if(!b) return;
+  const bOrders=DB.orders.filter(o=>o.branchId===b.id);
+  const bRevenue=bOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const bStaff=DB.users.filter(u=>u.branchId===b.id);
+  const bStock=DB.stock.filter(s=>s.branchId===b.id);
+  const pending=bOrders.filter(o=>o.status==='pending').length;
+  const paid=bOrders.filter(o=>o.status==='paid').length;
+  const isOwner=SESSION.user.role==='owner';
+  openModal(`🏢 ${b.name}`,`
+    <div style="display:grid;gap:14px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+        <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Revenue</div>
+          <div style="color:#9a6e10;font-weight:700;font-size:20px;">Ksh ${bRevenue.toFixed(0)}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Orders</div>
+          <div style="font-weight:700;font-size:20px;">${bOrders.length}</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:12px;text-align:center;">
+          <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;">Paid</div>
+          <div style="color:var(--green);font-weight:700;font-size:20px;">${paid}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div><div class="f-label">📍 Location</div><div style="font-size:14px;">${b.location||'—'}</div></div>
+        <div><div class="f-label">👤 Manager</div><div style="font-size:14px;">${b.manager||'Unassigned'}</div></div>
+        <div><div class="f-label">📞 Phone</div><div style="font-size:14px;">${b.phone||'—'}</div></div>
+        <div><div class="f-label">⏳ Pending Orders</div><div style="font-size:14px;">${pending}</div></div>
+      </div>
+      <div>
+        <div class="f-label" style="margin-bottom:8px;">👥 Staff at this Branch (${bStaff.length})</div>
+        ${bStaff.length?bStaff.map(u=>{
+          const roleBadge={owner:'badge-gold',manager:'badge-gold',counter:'badge-teal',waiter:'badge-blue'}[u.role]||'badge-gray';
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+            <span style="font-size:13px;font-weight:600;">${u.name}</span>
+            <span class="badge ${roleBadge}">${u.role}</span>
+          </div>`;
+        }).join(''):'<p class="fs-12 text-muted">No staff assigned.</p>'}
+      </div>
+      <div>
+        <div class="f-label" style="margin-bottom:8px;">📦 Stock Items (${bStock.length})</div>
+        ${bStock.length?bStock.map(s=>{
+          const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+          const cls=pct>50?'prog-green':pct>20?'prog-gold':'prog-red';
+          return `<div class="prog-wrap">
+            <div class="prog-meta"><span>${s.name}</span><span>${s.remaining} left</span></div>
+            <div class="prog-bar"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div>
+          </div>`;
+        }).join(''):'<p class="fs-12 text-muted">No stock items.</p>'}
+      </div>
+      ${isOwner?`<div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-gold btn-sm" onclick="closeModal();openEditBranch('${b.id}')">✏️ Edit Branch</button>
+        <button class="btn btn-danger btn-sm" onclick="closeModal();deleteBranch('${b.id}')">🗑 Delete Branch</button>
+      </div>`:''}
+    </div>`);
+}
+
+function openEditBranch(id){
+  const b=DB.branches.find(x=>x.id===id);
+  if(!b) return;
+  openModal(`✏️ Edit Branch — ${b.name}`,`
+    <div style="display:grid;gap:14px;">
+      <div><label class="f-label">Branch Name</label><input class="f-input" id="eb-name" value="${b.name}" placeholder="Branch name" /></div>
+      <div><label class="f-label">Location</label><input class="f-input" id="eb-loc" value="${b.location||''}" placeholder="Address or area" /></div>
+      <div><label class="f-label">Manager Name</label><input class="f-input" id="eb-mgr" value="${b.manager||''}" placeholder="Manager name" /></div>
+      <div><label class="f-label">Phone</label><input class="f-input" id="eb-phone" value="${b.phone||''}" placeholder="Branch contact" /></div>
+      <div class="alert alert-err" id="eb-err"></div>
+      <div class="alert alert-ok" id="eb-ok"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-gold" style="flex:1;" onclick="saveEditBranch('${id}')">💾 Save Changes</button>
+        <button class="btn btn-ghost" style="width:auto;" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>`);
+}
+
+function saveEditBranch(id){
+  const b=DB.branches.find(x=>x.id===id);
+  if(!b) return;
+  const name=document.getElementById('eb-name').value.trim();
+  if(!name){ document.getElementById('eb-err').textContent='Branch name is required.'; document.getElementById('eb-err').classList.add('show'); return; }
+  b.name=name;
+  b.location=document.getElementById('eb-loc').value.trim();
+  b.manager=document.getElementById('eb-mgr').value.trim();
+  b.phone=document.getElementById('eb-phone').value.trim();
+  addAudit('auth',`Branch updated: ${name}`);
+  saveDB();
+  document.getElementById('eb-ok').textContent='✅ Branch updated successfully!';
+  document.getElementById('eb-ok').classList.add('show');
+  setTimeout(()=>{ closeModal(); renderBranchCards(); populateBranchSelector(); },900);
+}
+
+function deleteBranch(id){
+  const b=DB.branches.find(x=>x.id===id);
+  if(!b) return;
+  if(!confirm(`Delete branch "${b.name}"? This cannot be undone.`)) return;
+  DB.branches=DB.branches.filter(x=>x.id!==id);
+  addAudit('auth',`Branch deleted: ${b.name}`);
+  saveDB();
+  renderBranchCards();
+  populateBranchSelector();
+}
+
+// ─────────────────────────────────────────────────────────
+// REPORTS
+// ─────────────────────────────────────────────────────────
+function refreshReports(){
+  const allOrders=DB.orders;
+  const revenue=allOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const outstanding=allOrders.filter(o=>o.status==='dispatched').reduce((a,o)=>a+o.total,0);
+  const stockVal=DB.stock.reduce((a,s)=>a+s.remaining*s.price,0);
+  const collectionRate=allOrders.length>0?Math.round((allOrders.filter(o=>o.status==='paid').length/allOrders.filter(o=>o.status!=='pending'&&o.status!=='cancelled').length||0)*100):0;
+
+  document.getElementById('reportStats').innerHTML=`
+    <div class="stat green clickable" onclick="showStatDetail('revenue')"><div class="stat-lbl">Total Revenue</div><div class="stat-val">Ksh ${revenue.toFixed(0)}</div><div class="stat-sub text-green">All branches</div></div>
+    <div class="stat red clickable" onclick="showStatDetail('outstanding')"><div class="stat-lbl">Outstanding</div><div class="stat-val">Ksh ${outstanding.toFixed(0)}</div><div class="stat-sub" style="color:var(--red)">Awaiting payment</div></div>
+    <div class="stat blue clickable" onclick="showStatDetail('orders')"><div class="stat-lbl">Total Orders</div><div class="stat-val">${allOrders.length}</div><div class="stat-sub text-muted">Tap to view all</div></div>
+    <div class="stat teal clickable" onclick="showStatDetail('stock')"><div class="stat-lbl">Stock Value</div><div class="stat-val">Ksh ${stockVal.toFixed(0)}</div><div class="stat-sub" style="color:var(--teal)">All items</div></div>
+    <div class="stat gold clickable" onclick="showStatDetail('collection')"><div class="stat-lbl">Collection Rate</div><div class="stat-val">${collectionRate}%</div><div class="stat-sub text-muted">Paid vs dispatched</div></div>`;
+
+  // Stock levels
+  document.getElementById('stockLevels').innerHTML = DB.stock.length
+    ? DB.stock.slice(0,8).map(s=>{
+        const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+        const cls=pct>50?'prog-green':pct>20?'prog-gold':'prog-red';
+        return `<div class="prog-wrap">
+          <div class="prog-meta"><span>${s.name}</span><span>${s.remaining}/${s.totalReceived}</span></div>
+          <div class="prog-bar"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div>
+        </div>`;
+      }).join('')
+    : '<p class="text-muted fs-12">No data.</p>';
+
+  // Branch revenue
+  document.getElementById('branchRevenue').innerHTML = DB.branches.map(b=>{
+    const bRev=DB.orders.filter(o=>o.branchId===b.id&&o.status==='paid').reduce((a,o)=>a+o.total,0);
+    const maxRev=Math.max(...DB.branches.map(br=>DB.orders.filter(o=>o.branchId===br.id&&o.status==='paid').reduce((a,o)=>a+o.total,0)),1);
+    const pct=Math.round((bRev/maxRev)*100);
+    return `<div class="prog-wrap">
+      <div class="prog-meta"><span>${b.name}</span><span class="text-gold">Ksh ${bRev.toFixed(0)}</span></div>
+      <div class="prog-bar"><div class="prog-fill prog-gold" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // Waiter performance
+  const waiters={};
+  DB.orders.forEach(o=>{
+    if(!waiters[o.waiterId]) waiters[o.waiterId]={name:o.waiter,branchId:o.branchId,total:0,paid:0,dispatched:0,revenue:0};
+    waiters[o.waiterId].total++;
+    if(o.status==='paid'){waiters[o.waiterId].paid++;waiters[o.waiterId].revenue+=o.total;}
+    if(o.status==='dispatched') waiters[o.waiterId].dispatched++;
+  });
+  document.getElementById('waiterPerfTbody').innerHTML = Object.values(waiters).length
+    ? Object.values(waiters).map(w=>{
+        const br=DB.branches.find(b=>b.id===w.branchId);
+        const closed=w.paid+w.dispatched||1;
+        const rate=Math.round((w.paid/closed)*100);
+        const rateColor=rate===100?'var(--green)':rate>=80?'var(--gold)':'var(--red)';
+        return `<tr>
+          <td><strong>${w.name}</strong></td>
+          <td class="fs-12 text-muted">${br?.name||'—'}</td>
+          <td class="mono">${w.total}</td>
+          <td><span class="badge badge-green">${w.paid}</span></td>
+          <td><span class="badge badge-gold">${w.dispatched}</span></td>
+          <td class="mono text-gold">Ksh ${w.revenue.toFixed(2)}</td>
+          <td><strong style="color:${rateColor}">${rate}%</strong></td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="7" class="text-muted">No data.</td></tr>';
+
+  // Top items
+  const itemSales={};
+  DB.orders.filter(o=>o.status==='paid').forEach(o=>{
+    o.items.forEach(i=>{
+      if(!itemSales[i.name]) itemSales[i.name]={name:i.name,qty:0,revenue:0,branchId:o.branchId};
+      itemSales[i.name].qty+=i.qty;
+      itemSales[i.name].revenue+=i.qty*i.price;
+    });
+  });
+  const topItems=Object.values(itemSales).sort((a,b)=>b.qty-a.qty).slice(0,8);
+  const stockCats=Object.fromEntries(DB.stock.map(s=>[s.name,s.category]));
+  document.getElementById('topItemsTbody').innerHTML = topItems.length
+    ? topItems.map((it,i)=>{
+        const br=DB.branches.find(b=>b.id===it.branchId);
+        return `<tr>
+          <td><strong>${i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':''}${it.name}</strong></td>
+          <td><span class="badge badge-blue">${stockCats[it.name]||'—'}</span></td>
+          <td class="mono">${it.qty}</td>
+          <td class="mono text-gold">Ksh ${it.revenue.toFixed(2)}</td>
+          <td class="fs-12 text-muted">${br?.name||'All'}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="5" class="text-muted">No sales yet.</td></tr>';
+}
+
+function showStatDetail(type){
+  const allOrders=DB.orders;
+  let title='', body='';
+
+  if(type==='revenue'){
+    title='💰 Total Revenue Breakdown';
+    const paidOrders=allOrders.filter(o=>o.status==='paid');
+    const branchRows=DB.branches.map(b=>{
+      const bRev=paidOrders.filter(o=>o.branchId===b.id).reduce((a,o)=>a+o.total,0);
+      const bCount=paidOrders.filter(o=>o.branchId===b.id).length;
+      return `<tr><td><strong>${b.name}</strong></td><td class="mono">${bCount} orders</td><td class="mono text-gold">Ksh ${bRev.toFixed(2)}</td></tr>`;
+    }).join('');
+    const total=paidOrders.reduce((a,o)=>a+o.total,0);
+    body=`<div class="tbl-wrap"><table><thead><tr><th>Branch</th><th>Orders</th><th>Revenue</th></tr></thead><tbody>${branchRows}</tbody></table></div>
+    <div style="margin-top:14px;padding:12px 16px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;">
+      <strong>Total</strong><span class="text-gold mono" style="font-size:18px;">Ksh ${total.toFixed(2)}</span></div>`;
+  }
+
+  else if(type==='outstanding'){
+    title='⏳ Outstanding Payments';
+    const dispatched=allOrders.filter(o=>o.status==='dispatched');
+    if(!dispatched.length){body='<p class="text-muted fs-12" style="padding:16px 0;">No outstanding orders. All orders have been settled. ✅</p>';}
+    else{
+      const rows=dispatched.map(o=>`<tr>
+        <td class="mono text-gold">#${o.id}</td>
+        <td>${o.table}</td>
+        <td class="fs-12 text-muted">${o.waiter}</td>
+        <td class="mono text-gold">Ksh ${o.total.toFixed(2)}</td>
+        <td><span class="badge badge-gold">Dispatched</span></td>
+        <td class="fs-11 text-muted">${o.time}</td>
+      </tr>`).join('');
+      const total=dispatched.reduce((a,o)=>a+o.total,0);
+      body=`<div class="tbl-wrap"><table><thead><tr><th>Order</th><th>Table</th><th>Waiter</th><th>Amount</th><th>Status</th><th>Time</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div style="margin-top:14px;padding:12px 16px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;">
+        <strong>Total Outstanding</strong><span style="color:var(--red);font-size:18px;" class="mono">Ksh ${total.toFixed(2)}</span></div>`;
+    }
+  }
+
+  else if(type==='orders'){
+    title='🧾 All Orders';
+    const statusColor={paid:'badge-green',dispatched:'badge-gold',pending:'badge-blue',cancelled:'badge-red'};
+    const rows=allOrders.slice().reverse().map(o=>`<tr>
+      <td class="mono text-gold">#${o.id}</td>
+      <td>${o.table}</td>
+      <td class="fs-12 text-muted">${o.waiter}</td>
+      <td class="mono">Ksh ${o.total.toFixed(2)}</td>
+      <td><span class="badge ${statusColor[o.status]||'badge-gray'}">${o.status}</span></td>
+      <td class="fs-11 text-muted">${o.time}</td>
+    </tr>`).join('');
+    body=`<div class="tbl-wrap"><table><thead><tr><th>Order</th><th>Table/Customer</th><th>Waiter</th><th>Total</th><th>Status</th><th>Time</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="text-muted">No orders yet.</td></tr>'}</tbody></table></div>`;
+  }
+
+  else if(type==='stock'){
+    title='📦 Stock Inventory Value';
+    const rows=DB.stock.map(s=>{
+      const val=s.remaining*s.price;
+      const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+      const cls=pct>50?'badge-green':pct>20?'badge-gold':'badge-red';
+      return `<tr>
+        <td><strong>${s.name}</strong></td>
+        <td class="fs-12 text-muted">${s.category||'—'}</td>
+        <td class="mono">${s.remaining}/${s.totalReceived}</td>
+        <td><span class="badge ${cls}">${pct}%</span></td>
+        <td class="mono">Ksh ${s.price.toFixed(2)}</td>
+        <td class="mono text-gold">Ksh ${val.toFixed(2)}</td>
+      </tr>`;
+    }).join('');
+    const total=DB.stock.reduce((a,s)=>a+s.remaining*s.price,0);
+    body=`<div class="tbl-wrap"><table><thead><tr><th>Item</th><th>Category</th><th>Stock</th><th>Level</th><th>Unit Price</th><th>Value</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="text-muted">No stock.</td></tr>'}</tbody></table></div>
+    <div style="margin-top:14px;padding:12px 16px;background:var(--surface2);border-radius:8px;display:flex;justify-content:space-between;">
+      <strong>Total Stock Value</strong><span class="mono" style="color:var(--teal);font-size:18px;">Ksh ${total.toFixed(2)}</span></div>`;
+  }
+
+  else if(type==='collection'){
+    title='📊 Collection Rate Details';
+    const paid=allOrders.filter(o=>o.status==='paid').length;
+    const dispatched=allOrders.filter(o=>o.status==='dispatched').length;
+    const cancelled=allOrders.filter(o=>o.status==='cancelled').length;
+    const pending=allOrders.filter(o=>o.status==='pending').length;
+    const closed=paid+dispatched||1;
+    const rate=Math.round((paid/closed)*100);
+    const color=rate===100?'var(--green)':rate>=80?'var(--gold)':'var(--red)';
+    body=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+        <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Paid Orders</div>
+        <div style="font-size:28px;font-weight:700;color:var(--green);">${paid}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+        <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Dispatched (Unpaid)</div>
+        <div style="font-size:28px;font-weight:700;color:var(--gold);">${dispatched}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+        <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Pending</div>
+        <div style="font-size:28px;font-weight:700;color:var(--blue);">${pending}</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+        <div class="fs-11 text-muted" style="letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">Cancelled</div>
+        <div style="font-size:28px;font-weight:700;color:var(--red);">${cancelled}</div>
+      </div>
+    </div>
+    <div style="padding:16px;background:var(--surface2);border-radius:10px;text-align:center;">
+      <div class="fs-11 text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Overall Collection Rate</div>
+      <div style="font-size:48px;font-weight:900;color:${color};">${rate}%</div>
+      <div class="fs-12 text-muted" style="margin-top:6px;">${paid} paid out of ${closed} closed orders</div>
+    </div>`;
+  }
+
+  document.getElementById('modalTitle').textContent=title;
+  document.getElementById('modalBody').innerHTML=body;
+  document.getElementById('modalOv').classList.add('open');
+}
+
+function exportReport(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const allOrders=DB.orders;
+  const revenue=allOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const outstanding=allOrders.filter(o=>o.status==='dispatched').reduce((a,o)=>a+o.total,0);
+  const stockVal=DB.stock.reduce((a,s)=>a+s.remaining*s.price,0);
+  const collectionRate=allOrders.length>0?Math.round((allOrders.filter(o=>o.status==='paid').length/Math.max(allOrders.filter(o=>o.status!=='pending'&&o.status!=='cancelled').length,1))*100):0;
+  const now=new Date().toLocaleString();
+  const dateStr=new Date().toISOString().split('T')[0];
+  const pageW=doc.internal.pageSize.getWidth();
+  const pageH=doc.internal.pageSize.getHeight();
+
+  // ── Header bar ──
+  doc.setFillColor(13,21,38);
+  doc.rect(0,0,pageW,28,'F');
+  doc.setFillColor(212,168,67);
+  doc.rect(0,26,pageW,2,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(20);
+  doc.setTextColor(212,168,67);
+  doc.text('BartracKE',14,17);
+  doc.setFontSize(8);
+  doc.setTextColor(160,175,200);
+  doc.text('Complete Bar & Restaurant Management',14,23);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.setTextColor(160,175,200);
+  doc.text('Business Report',pageW-14,14,{align:'right'});
+  doc.text(now,pageW-14,20,{align:'right'});
+
+  // ── Summary KPI boxes ──
+  let y=38;
+  const kpis=[
+    {label:'Total Revenue',value:'Ksh '+revenue.toFixed(0),color:[39,201,110]},
+    {label:'Outstanding',value:'Ksh '+outstanding.toFixed(0),color:[232,69,69]},
+    {label:'Total Orders',value:String(allOrders.length),color:[58,143,232]},
+    {label:'Stock Value',value:'Ksh '+stockVal.toFixed(0),color:[26,184,160]},
+    {label:'Collection Rate',value:collectionRate+'%',color:[212,168,67]},
+  ];
+  const boxW=(pageW-28)/kpis.length-2;
+  kpis.forEach((k,i)=>{
+    const bx=14+i*(boxW+2);
+    doc.setFillColor(22,29,46);
+    doc.roundedRect(bx,y,boxW,18,2,2,'F');
+    doc.setDrawColor(...k.color);
+    doc.setLineWidth(0.8);
+    doc.line(bx,y,bx,y+18);
+    doc.setFontSize(7);
+    doc.setTextColor(107,127,163);
+    doc.setFont('helvetica','normal');
+    doc.text(k.label.toUpperCase(),bx+3,y+6);
+    doc.setFontSize(11);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(...k.color);
+    doc.text(k.value,bx+3,y+14);
+  });
+  y+=26;
+
+  // ── Revenue by Branch ──
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(232,238,248);
+  doc.text('Revenue by Branch',14,y);
+  y+=4;
+  const branchData=DB.branches.map(b=>{
+    const rev=allOrders.filter(o=>o.branchId===b.id&&o.status==='paid').reduce((a,o)=>a+o.total,0);
+    const cnt=allOrders.filter(o=>o.branchId===b.id).length;
+    return [b.name,b.location||'—',String(cnt),'Ksh '+rev.toFixed(2)];
+  });
+  doc.autoTable({
+    startY:y,head:[['Branch','Location','Orders','Revenue']],body:branchData,
+    theme:'grid',styles:{fontSize:9,cellPadding:3,textColor:[232,238,248],fillColor:[15,20,32],lineColor:[35,47,74]},
+    headStyles:{fillColor:[22,29,46],textColor:[212,168,67],fontStyle:'bold',lineColor:[35,47,74]},
+    alternateRowStyles:{fillColor:[22,29,46]},
+    margin:{left:14,right:14},
+  });
+  y=doc.lastAutoTable.finalY+8;
+
+  // ── Stock Inventory ──
+  if(y>pageH-60){doc.addPage();y=20;}
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(232,238,248);
+  doc.text('Stock Inventory',14,y);
+  y+=4;
+  const stockData=DB.stock.map(s=>{
+    const pct=s.totalReceived>0?Math.round((s.remaining/s.totalReceived)*100):0;
+    return [s.name,s.category||'—',s.remaining+'/'+s.totalReceived,pct+'%','Ksh '+s.price.toFixed(2),'Ksh '+(s.remaining*s.price).toFixed(2)];
+  });
+  doc.autoTable({
+    startY:y,head:[['Item','Category','Stock','Level','Unit Price','Value']],body:stockData,
+    theme:'grid',styles:{fontSize:8,cellPadding:3,textColor:[232,238,248],fillColor:[15,20,32],lineColor:[35,47,74]},
+    headStyles:{fillColor:[22,29,46],textColor:[26,184,160],fontStyle:'bold',lineColor:[35,47,74]},
+    alternateRowStyles:{fillColor:[22,29,46]},
+    margin:{left:14,right:14},
+    didParseCell:function(d){
+      if(d.section==='body'&&d.column.index===3){
+        const v=parseInt(d.cell.raw);
+        d.cell.styles.textColor=v>50?[39,201,110]:v>20?[212,168,67]:[232,69,69];
+      }
+    }
+  });
+  y=doc.lastAutoTable.finalY+8;
+
+  // ── Orders Log ──
+  if(y>pageH-60){doc.addPage();y=20;}
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(232,238,248);
+  doc.text('Orders Log',14,y);
+  y+=4;
+  const orderData=allOrders.map(o=>['#'+o.id,o.table,o.waiter,'Ksh '+o.total.toFixed(2),o.status.toUpperCase(),o.time]);
+  doc.autoTable({
+    startY:y,head:[['Order #','Table/Customer','Waiter','Amount','Status','Time']],body:orderData,
+    theme:'grid',styles:{fontSize:8,cellPadding:3,textColor:[232,238,248],fillColor:[15,20,32],lineColor:[35,47,74]},
+    headStyles:{fillColor:[22,29,46],textColor:[58,143,232],fontStyle:'bold',lineColor:[35,47,74]},
+    alternateRowStyles:{fillColor:[22,29,46]},
+    margin:{left:14,right:14},
+    didParseCell:function(d){
+      if(d.section==='body'&&d.column.index===4){
+        const s=d.cell.raw;
+        d.cell.styles.textColor=s==='PAID'?[39,201,110]:s==='DISPATCHED'?[212,168,67]:s==='CANCELLED'?[232,69,69]:[160,175,200];
+        d.cell.styles.fontStyle='bold';
+      }
+    }
+  });
+
+  // ── Footer on all pages ──
+  const totalPages=doc.internal.getNumberOfPages();
+  for(let p=1;p<=totalPages;p++){
+    doc.setPage(p);
+    doc.setFillColor(13,21,38);
+    doc.rect(0,pageH-10,pageW,10,'F');
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7);
+    doc.setTextColor(107,127,163);
+    doc.text('Generated by BartracKE — '+now,14,pageH-3);
+    doc.text('Page '+p+' of '+totalPages,pageW-14,pageH-3,{align:'right'});
+  }
+
+  doc.save('BartracKE_Report_'+dateStr+'.pdf');
+}
+
+// ─────────────────────────────────────────────────────────
+// AUDIT TRAIL
+// ─────────────────────────────────────────────────────────
+function renderAudit(){
+  const filter=document.getElementById('auditFilter')?.value||'all';
+  let entries=DB.audit.slice().reverse();
+  if(filter!=='all') entries=entries.filter(a=>a.type===filter);
+  document.getElementById('auditCount').textContent=`${entries.length} entries`;
+  const typeBadge={stock:'badge-teal',order:'badge-blue',transfer:'badge-gold',shift:'badge-purple',auth:'badge-gray'};
+  document.getElementById('auditTbody').innerHTML = entries.length
+    ? entries.map(a=>`<tr>
+        <td class="mono fs-11 text-muted">${a.time}</td>
+        <td><span class="badge ${typeBadge[a.type]||'badge-gray'}">${a.type}</span></td>
+        <td class="fs-12 text-muted">${a.branch||'—'}</td>
+        <td><strong>${a.user}</strong></td>
+        <td class="fs-12"><span class="badge badge-gray">${a.role}</span></td>
+        <td class="fs-12">${a.action}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="6" class="text-muted">No entries.</td></tr>';
+}
+
+// ─────────────────────────────────────────────────────────
+// HISTORY
+// ─────────────────────────────────────────────────────────
+let _historyPeriod = 'today';
+
+function setHistoryPeriod(period){
+  _historyPeriod = period;
+  // Keep the dropdown in sync (in case called programmatically)
+  const sel = document.getElementById('histPeriodSelect');
+  if(sel) sel.value = period;
+  renderHistoryStats();
+  renderHistoryOrders();
+}
+
+function _historyDateRange(period){
+  const now = new Date();
+  const startOfDay = d => { const x=new Date(d); x.setHours(0,0,0,0); return x; };
+  const endOfDay   = d => { const x=new Date(d); x.setHours(23,59,59,999); return x; };
+  let from, to, label;
+  switch(period){
+    case 'today':
+      from = startOfDay(now); to = endOfDay(now); label = 'Today';
+      break;
+    case 'yesterday': {
+      const y = new Date(now); y.setDate(now.getDate()-1);
+      from = startOfDay(y); to = endOfDay(y); label = 'Yesterday';
+      break;
+    }
+    case 'week': {
+      const d = new Date(now); d.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1));
+      from = startOfDay(d); to = endOfDay(now); label = 'This Week';
+      break;
+    }
+    case 'lastweek': {
+      const d = new Date(now); d.setDate(now.getDate() - now.getDay() + (now.getDay()===0?-6:1) - 7);
+      const e = new Date(d); e.setDate(d.getDate()+6);
+      from = startOfDay(d); to = endOfDay(e); label = 'Last Week';
+      break;
+    }
+    case 'month':
+      from = new Date(now.getFullYear(), now.getMonth(), 1);
+      to   = endOfDay(now); label = 'This Month';
+      break;
+    case 'lastmonth': {
+      const lm = new Date(now.getFullYear(), now.getMonth()-1, 1);
+      const lme = new Date(now.getFullYear(), now.getMonth(), 0);
+      from = lm; to = endOfDay(lme); label = 'Last Month';
+      break;
+    }
+    case 'year':
+      from = new Date(now.getFullYear(), 0, 1);
+      to   = endOfDay(now); label = 'This Year';
+      break;
+    case 'lastyear': {
+      from = new Date(now.getFullYear()-1, 0, 1);
+      to   = new Date(now.getFullYear()-1, 11, 31, 23, 59, 59, 999); label = 'Last Year';
+      break;
+    }
+    default:
+      from = new Date(0); to = new Date(9999,0,1); label = 'All Time';
+  }
+  return {from, to, label};
+}
+
+function _parseOrderDate(order){
+  // Orders store time as locale string e.g. "09 Apr 2025, 14:32"
+  // Try to parse it; fall back to epoch 0 if unparseable
+  try{
+    if(!order.time) return new Date(0);
+    // "09 Apr 2025, 14:32" → parseable by most engines
+    const d = new Date(order.time.replace(',',''));
+    return isNaN(d.getTime()) ? new Date(0) : d;
+  }catch(e){ return new Date(0); }
+}
+
+function _filteredOrders(){
+  const {from, to} = _historyDateRange(_historyPeriod);
+  const statusFilter = document.getElementById('histStatusFilter')?.value || 'all';
+  let orders = DB.orders.filter(o => {
+    const d = _parseOrderDate(o);
+    return d >= from && d <= to;
+  });
+  if(statusFilter !== 'all') orders = orders.filter(o => o.status === statusFilter);
+  return orders;
+}
+
+function renderHistoryStats(){
+  const {from, to, label} = _historyDateRange(_historyPeriod);
+  const periodOrders = DB.orders.filter(o => {
+    const d = _parseOrderDate(o); return d >= from && d <= to;
+  });
+  const revenue   = periodOrders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const pending   = periodOrders.filter(o=>o.status==='dispatched').reduce((a,o)=>a+o.total,0);
+  const cancelled = periodOrders.filter(o=>o.status==='cancelled').length;
+  const paid      = periodOrders.filter(o=>o.status==='paid').length;
+  const total     = periodOrders.length;
+
+  // Update title
+  const titleEl = document.getElementById('histOrdersTitle');
+  if(titleEl) titleEl.textContent = `Orders — ${label}`;
+  const subEl = document.getElementById('histOrdersSub');
+  if(subEl) subEl.textContent = `${from.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}${_historyPeriod!=='today'&&_historyPeriod!=='yesterday'?' — '+to.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):''}`;
+
+  document.getElementById('historyStats').innerHTML = `
+    <div class="stat gold"><div class="stat-lbl">Revenue</div><div class="stat-val">Ksh ${revenue.toFixed(0)}</div><div class="stat-sub text-green">${paid} paid orders</div></div>
+    <div class="stat red"><div class="stat-lbl">Outstanding</div><div class="stat-val">Ksh ${pending.toFixed(0)}</div><div class="stat-sub" style="color:var(--red)">Awaiting payment</div></div>
+    <div class="stat blue"><div class="stat-lbl">Total Orders</div><div class="stat-val">${total}</div><div class="stat-sub text-muted">${label}</div></div>
+    <div class="stat teal"><div class="stat-lbl">Paid Orders</div><div class="stat-val">${paid}</div><div class="stat-sub text-green">of ${total} total</div></div>
+    <div class="stat red"><div class="stat-lbl">Cancelled</div><div class="stat-val">${cancelled}</div><div class="stat-sub text-muted">not fulfilled</div></div>`;
+
+  // Branch revenue
+  document.getElementById('histBranchRevenue').innerHTML = DB.branches.map(b => {
+    const bOrders = DB.orders.filter(o => {
+      const d = _parseOrderDate(o); return d >= from && d <= to && o.branchId === b.id && o.status === 'paid';
+    });
+    const bRev = bOrders.reduce((a,o)=>a+o.total,0);
+    const maxRev = Math.max(...DB.branches.map(br => DB.orders.filter(o=>{
+      const d=_parseOrderDate(o); return d>=from&&d<=to&&o.branchId===br.id&&o.status==='paid';
+    }).reduce((a,o)=>a+o.total,0)),1);
+    const pct = Math.round((bRev/maxRev)*100);
+    return `<div class="prog-wrap">
+      <div class="prog-meta"><span>${b.name}</span><span class="text-gold">Ksh ${bRev.toFixed(0)}</span></div>
+      <div class="prog-bar"><div class="prog-fill prog-gold" style="width:${pct}%"></div></div>
+      <div class="fs-11 text-muted">${bOrders.length} order${bOrders.length!==1?'s':''}</div>
+    </div>`;
+  }).join('') || '<p class="text-muted fs-12">No data for this period.</p>';
+
+  // Top items
+  const itemSales = {};
+  DB.orders.filter(o => {
+    const d = _parseOrderDate(o); return d >= from && d <= to && o.status === 'paid';
+  }).forEach(o => {
+    o.items.forEach(i => {
+      if(!itemSales[i.name]) itemSales[i.name] = {qty:0, revenue:0};
+      itemSales[i.name].qty += i.qty;
+      itemSales[i.name].revenue += i.qty * i.price;
+    });
+  });
+  const topItems = Object.entries(itemSales).sort((a,b)=>b[1].qty-a[1].qty).slice(0,6);
+  document.getElementById('histTopItems').innerHTML = topItems.length
+    ? topItems.map(([name,d],i)=>`
+        <div class="prog-wrap">
+          <div class="prog-meta">
+            <span>${i===0?'🥇 ':i===1?'🥈 ':i===2?'🥉 ':''}${name}</span>
+            <span class="text-gold">${d.qty} sold</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill prog-green" style="width:${Math.round((d.qty/topItems[0][1].qty)*100)}%"></div></div>
+          <div class="fs-11 text-muted">Ksh ${d.revenue.toFixed(0)} revenue</div>
+        </div>`).join('')
+    : '<p class="text-muted fs-12">No sales for this period.</p>';
+}
+
+function renderHistoryOrders(){
+  renderHistoryStats(); // keep stats in sync with status filter
+  const orders = _filteredOrders().slice().reverse();
+  const statusBadge = {
+    pending:'<span class="badge badge-gold">⏳ Pending</span>',
+    dispatched:'<span class="badge badge-blue">🚀 Dispatched</span>',
+    paid:'<span class="badge badge-green">✅ Paid</span>',
+    cancelled:'<span class="badge badge-red">❌ Cancelled</span>'
+  };
+  document.getElementById('histOrdersTbody').innerHTML = orders.length
+    ? orders.map(o => {
+        const br = DB.branches.find(b=>b.id===o.branchId);
+        const itemsSummary = o.items.map(i=>`${i.qty}× ${i.name}`).join(', ');
+        return `<tr style="cursor:pointer;" onclick="viewOrderDetail(${o.id})">
+          <td class="mono text-gold fw-bold">#${o.id}</td>
+          <td><strong>${o.table}</strong></td>
+          <td class="fs-12 text-muted">${o.waiter}</td>
+          <td><span class="badge badge-purple">${br?.name||'—'}</span></td>
+          <td class="fs-12 text-muted" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemsSummary}</td>
+          <td class="mono fw-bold text-gold">Ksh ${o.total.toFixed(2)}</td>
+          <td>${statusBadge[o.status]||''}</td>
+          <td class="mono fs-11 text-muted">${o.time}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="8" class="text-muted" style="padding:20px;text-align:center;">No orders found for this period.</td></tr>';
+}
+
+function refreshHistory(){
+  setHistoryPeriod(_historyPeriod);
+}
+
+function exportHistoryPDF(){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
+  const {label} = _historyDateRange(_historyPeriod);
+  const orders = _filteredOrders().slice().reverse();
+  const revenue = orders.filter(o=>o.status==='paid').reduce((a,o)=>a+o.total,0);
+  const now = new Date().toLocaleString();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+
+  // Header
+  doc.setFillColor(13,21,38);
+  doc.rect(0,0,pageW,22,'F');
+  doc.setFillColor(212,168,67);
+  doc.rect(0,20,pageW,2,'F');
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.setTextColor(212,168,67);
+  doc.text('BartracKE — History Report',14,13);
+  doc.setFontSize(8);
+  doc.setTextColor(160,175,200);
+  doc.text(`Period: ${label}  ·  Generated: ${now}`,14,19);
+  doc.text(`Total Revenue: Ksh ${revenue.toFixed(2)}  ·  Orders: ${orders.length}`,pageW-14,19,{align:'right'});
+
+  const rows = orders.map(o=>{
+    const br = DB.branches.find(b=>b.id===o.branchId);
+    return ['#'+o.id, o.table, o.waiter, br?.name||'—', o.items.map(i=>i.qty+'× '+i.name).join(', '),
+      'Ksh '+o.total.toFixed(2), o.status.toUpperCase(), o.time];
+  });
+
+  doc.autoTable({
+    startY:28,
+    head:[['Order','Table/Customer','Waiter','Branch','Items','Total','Status','Time']],
+    body:rows,
+    theme:'grid',
+    styles:{fontSize:7,cellPadding:2.5,textColor:[232,238,248],fillColor:[15,20,32],lineColor:[35,47,74]},
+    headStyles:{fillColor:[22,29,46],textColor:[212,168,67],fontStyle:'bold',lineColor:[35,47,74]},
+    alternateRowStyles:{fillColor:[22,29,46]},
+    margin:{left:10,right:10},
+    didParseCell:function(d){
+      if(d.section==='body'&&d.column.index===6){
+        const s=d.cell.raw;
+        d.cell.styles.textColor=s==='PAID'?[39,201,110]:s==='DISPATCHED'?[212,168,67]:s==='CANCELLED'?[232,69,69]:[160,175,200];
+        d.cell.styles.fontStyle='bold';
+      }
+    }
+  });
+
+  // Footer
+  const total=doc.internal.getNumberOfPages();
+  for(let p=1;p<=total;p++){
+    doc.setPage(p);
+    doc.setFillColor(13,21,38);
+    doc.rect(0,pageH-8,pageW,8,'F');
+    doc.setFontSize(7);
+    doc.setTextColor(107,127,163);
+    doc.text('BartracKE · '+now,10,pageH-2);
+    doc.text('Page '+p+' of '+total,pageW-10,pageH-2,{align:'right'});
+  }
+  doc.save('BartracKE_History_'+label.replace(/\s+/g,'_')+'.pdf');
+}
+
+// ─────────────────────────────────────────────────────────
+// PERSISTENCE — Firebase (primary) + localStorage (offline backup)
+
+// ─────────────────────────────────────────────────────────
+const STORAGE_KEY = 'bartracKE_db';
+
+/* ── FIREBASE CONFIG ──
+   Paste your Firebase project credentials below.
+   Get them from: Firebase Console → Project Settings → Your apps → Web app
+   ──────────────────────────────────────────────────────── */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB9e6x-G3LHGtnUKjP4VmI0_v7kotVQ8XE",
+  authDomain: "bartrake-60632.firebaseapp.com",
+  projectId: "bartrake-60632",
+  storageBucket: "bartrake-60632.firebasestorage.app",
+  messagingSenderId: "572674921460",
+  appId: "1:572674921460:web:ffc314f373ebeb60e4dfa1"
+};
+
+let _fbApp = null;
+let _db    = null;
+let _auth  = null;
+let _fbOK  = false;
+
+function _initFirebase(){
+  try{
+    _fbApp = (typeof firebase !== 'undefined' && firebase.apps.length)
+      ? firebase.apps[0]
+      : firebase.initializeApp(FIREBASE_CONFIG);
+    _db   = firebase.firestore(_fbApp);
+    _auth = firebase.auth(_fbApp);
+    _fbOK = true;
+    console.log("[BarTracKE] Firebase connected ✅");
+
+    // ── Key fix: only start the real-time listener once Auth confirms
+    //    a signed-in user. This prevents the snapshot being silently
+    //    rejected by Firestore security rules before login.
+    _auth.onAuthStateChanged(function(firebaseUser){
+      if(firebaseUser){
+        console.log("[BarTracKE] Auth ready — starting real-time sync ✅");
+        _fbStartListeners();
+      } else {
+        // Not signed into Firebase Auth yet — stop any active listener
+        if(_unsubscribeSnapshot) { _unsubscribeSnapshot(); _unsubscribeSnapshot = null; }
+      }
+    });
+  }catch(e){
+    console.warn("[BarTracKE] Firebase init failed — using localStorage:", e.message);
+    _fbOK = false;
+  }
+}
+
+let _unsubscribeSnapshot = null;
+
+function _fbStartListeners(){
+  if(!_fbOK || !_db) return;
+  // Cancel any existing listener before creating a new one
+  if(_unsubscribeSnapshot){ _unsubscribeSnapshot(); _unsubscribeSnapshot = null; }
+  _unsubscribeSnapshot = _db.collection("bartracKE").doc("data").onSnapshot(function(doc){
+    if(doc.exists && !doc.metadata.hasPendingWrites){
+      try{
+        const remote = doc.data();
+        const saved  = JSON.parse(remote.payload);
+        _applyLoadedData(saved);
+        _lsSave(_buildPayload()); // keep localStorage in sync too
+        // Re-render the current page for the logged-in user
+        if(SESSION.user) showPage(currentPage);
+        console.log("[BarTracKE] Real-time sync received ✅");
+      }catch(e){ console.warn("[BarTracKE] Snapshot parse error:", e); }
+    }
+  }, function(err){
+    console.warn("[BarTracKE] Snapshot error:", err.code, err.message);
+    // If permission denied, retry after next auth state change
+    _unsubscribeSnapshot = null;
+  });
+}
+
+/* ── _fbCreateAuthUser — create a Firebase Auth account for a staff member ──
+   Called when registering new staff. Uses a secondary app instance so the
+   currently signed-in user (the owner) is NOT displaced during creation.    */
+function _fbCreateAuthUser(email, password, displayName){
+  if(!_fbOK || !firebase) return;
+  try{
+    // Create a temporary secondary Firebase app to avoid displacing current session
+    const tempApp = firebase.initializeApp(FIREBASE_CONFIG, 'tempRegister_' + Date.now());
+    const tempAuth = firebase.auth(tempApp);
+    tempAuth.createUserWithEmailAndPassword(email, password)
+      .then(function(cred){
+        if(displayName) cred.user.updateProfile({displayName: displayName}).catch(function(){});
+        console.log('[BarTracKE] Firebase Auth account created for:', email);
+        tempApp.delete();
+      })
+      .catch(function(e){
+        if(e.code === 'auth/email-already-in-use'){
+          console.log('[BarTracKE] Firebase Auth account already exists for:', email);
+        } else {
+          console.warn('[BarTracKE] Failed to create Auth account for', email, ':', e.message);
+        }
+        tempApp.delete().catch(function(){});
+      });
+  }catch(e){
+    console.warn('[BarTracKE] _fbCreateAuthUser error:', e.message);
+  }
+}
+
+
+function _lsSave(payload){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); }catch(e){ console.warn("LS save failed:", e); }
+}
+function _lsLoad(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+
+/* ── Apply loaded data into DB ── */
+function _applyLoadedData(saved){
+  if(!saved) return false;
+  /* Load all collections — use saved array even if empty (allows deletions to sync) */
+  if(Array.isArray(saved.branches))  DB.branches  = saved.branches;
+  if(Array.isArray(saved.users)){
+    DB.users = saved.users;
+    /* Always ensure the owner account exists with correct credentials */
+    const ownerExists = DB.users.find(u => u.role === 'owner');
+    if(!ownerExists){
+      const bungomaBranch = DB.branches.find(b => b.name === 'Bungoma');
+      DB.users.unshift({
+        id:'owner-1',
+        name:'System Owner',
+        username:'nakibongochiali@gmail.com',
+        email:'nakibongochiali@gmail.com',
+        phone:'',
+        password:'Bartracke@2018',
+        role:'owner',
+        branchId: bungomaBranch ? bungomaBranch.id : '',
+        active:true
+      });
+    }
+  }
+  if(Array.isArray(saved.stock))      DB.stock     = saved.stock;
+  if(Array.isArray(saved.transfers))  DB.transfers = saved.transfers;
+  if(Array.isArray(saved.orders))     DB.orders    = saved.orders;
+  if(Array.isArray(saved.suppliers))  DB.suppliers = saved.suppliers;
+  if(Array.isArray(saved.shifts))     DB.shifts    = saved.shifts;
+  if(Array.isArray(saved.audit))      DB.audit     = saved.audit;
+  if(saved.orderIdCounter)            SESSION.orderIdCounter = parseInt(saved.orderIdCounter)||1000;
+  if(DB.orders.length){
+    const maxId = Math.max(...DB.orders.map(o => parseInt(o.id)||0));
+    if(maxId >= SESSION.orderIdCounter) SESSION.orderIdCounter = maxId;
+  }
+  /* Ensure at least the Bungoma branch exists */
+  if(!DB.branches.find(b => b.name === 'Bungoma')){
+    DB.branches.unshift({
+      id:'branch-bungoma-hq',
+      name:'Bungoma',
+      location:'Bungoma Town',
+      manager:'System Owner',
+      phone:'+254726767309'
+    });
+  }
+  return true;
+}
+
+/* ── Build payload object ── */
+function _buildPayload(){
+  return {
+    branches:       DB.branches,
+    users:          DB.users,
+    stock:          DB.stock,
+    transfers:      DB.transfers,
+    orders:         DB.orders,
+    suppliers:      DB.suppliers,
+    shifts:         DB.shifts,
+    audit:          DB.audit,
+    orderIdCounter: SESSION.orderIdCounter,
+  };
+}
+
+/* ── saveDB — writes to localStorage always, Firestore if connected ── */
+function saveDB(){
+  const payload = _buildPayload();
+  _lsSave(payload);
+  if(_fbOK && _db){
+    _db.collection("bartracKE").doc("data")
+      .set({ payload: JSON.stringify(payload), updatedAt: Date.now() })
+      .then(function(){ console.log("[BarTracKE] Saved to Firestore ✅"); })
+      .catch(function(e){ console.warn("[BarTracKE] Firestore save failed:", e); });
+  }
+}
+
+/* ── loadDB — reads from localStorage (fast); Firestore syncs via listener ── */
+function loadDB(){
+  try{
+    const saved = _lsLoad();
+    if(!saved) return false;
+    return _applyLoadedData(saved);
+  }catch(e){ console.warn("Load failed:", e); return false; }
+}
+
+/* ── refreshCurrentPage — re-render portal after a Firestore sync ── */
+function refreshCurrentPage(){
+  if(SESSION.user) showPage(currentPage);
+}
+
+// ─────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────
+
+/* Show a loading overlay while we wait for Firestore on a fresh start */
+function _showLoadingOverlay(msg){
+  let ov = document.getElementById('_loadingOv');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = '_loadingOv';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:linear-gradient(145deg,#091228,#0d1b3e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
+    ov.innerHTML = '<div style="font-family:\'Playfair Display\',serif;font-size:40px;font-weight:900;background:linear-gradient(135deg,#f0c84a,#c9962a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🍺 BartracKE</div>'
+      + '<div id="_loadingMsg" style="color:rgba(255,255,255,0.6);font-size:13px;letter-spacing:2px;text-transform:uppercase;">'+msg+'</div>'
+      + '<div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:#c9962a;border-radius:50%;animation:_spin 0.8s linear infinite;"></div>'
+      + '<style>@keyframes _spin{to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(ov);
+  } else {
+    document.getElementById('_loadingMsg').textContent = msg;
+  }
+}
+
+function _hideLoadingOverlay(){
+  const ov = document.getElementById('_loadingOv');
+  if(ov){ ov.style.opacity='0'; ov.style.transition='opacity 0.4s'; setTimeout(()=>ov.remove(), 400); }
+}
+
+/* ── Bootstrap ──
+   STRATEGY: Never read Firestore without auth.
+   - Always init Firebase first (SDK only, no reads).
+   - If localStorage has data → load it, show login.
+   - If localStorage is EMPTY (data cleared) → seed a minimal stub
+     (owner + Bungoma branch) so login form works, set a restore flag.
+   - After the user logs in and Firebase Auth succeeds, _doFirestoreRestore()
+     is called — NOW with auth — fetches real data, overwrites the stub,
+     saves to localStorage, then enters the app.
+*/
+
+// Step 1: Always init Firebase first (no Firestore reads yet)
+_initFirebase();
+
+// Step 2: Load from localStorage
+const _hasSaved = loadDB();
+
+if(_hasSaved){
+  /* Fast path — localStorage intact, just ensure critical records exist */
+  if(!DB.branches.find(b => b.name === 'Bungoma')){
+    DB.branches.unshift({id:'branch-bungoma-hq',name:'Bungoma',location:'Bungoma Town',manager:'System Owner',phone:'+254726767309'});
+  }
+  if(!DB.users.find(u => u.role === 'owner')){
+    const _bb = DB.branches.find(b => b.name === 'Bungoma');
+    DB.users.unshift({id:'owner-1',name:'System Owner',username:'nakibongochiali@gmail.com',email:'nakibongochiali@gmail.com',phone:'',password:'Bartracke@2018',role:'owner',branchId:_bb?_bb.id:'',active:true});
+  }
+  _lsSave(_buildPayload());
+  renderSplashBranches();
+} else {
+  /* Cold start — localStorage was cleared.
+     Seed a minimal stub so the login form has branches/owner to show.
+     Real data will be restored from Firestore after login (auth required). */
+  console.log('[BarTracKE] No local data — will restore from Firestore after login.');
+  seedData();
+  _lsSave(_buildPayload());
+  window._needsFirestoreRestore = true;
+  renderSplashBranches();
+}
+
+/* ── _doFirestoreRestore ──────────────────────────────────────────────
+   Called from doLogin() AFTER Firebase Auth sign-in succeeds.
+   At this point request.auth != null so Firestore security rules pass.
+   Fetches the saved payload, overwrites in-memory DB and localStorage,
+   then calls onDone() to continue launching the app.
+   ──────────────────────────────────────────────────────────────────── */
+function _doFirestoreRestore(onDone){
+  if(!window._needsFirestoreRestore){ if(onDone) onDone(); return; }
+  if(!_fbOK || !_db){ window._needsFirestoreRestore = false; if(onDone) onDone(); return; }
+
+  console.log('[BarTracKE] Restoring data from Firestore after auth…');
+  _showLoadingOverlay('Restoring your data…');
+
+  let _doneCalled = false;
+  function _done(){
+    if(_doneCalled) return;
+    _doneCalled = true;
+    clearTimeout(_restoreTimer);
+    _hideLoadingOverlay();
+    window._needsFirestoreRestore = false;
+    if(onDone) onDone();
+  }
+
+  // Timeout — if Firestore doesn't respond in 10s, proceed anyway
+  const _restoreTimer = setTimeout(function(){
+    console.warn('[BarTracKE] Firestore restore timed out — proceeding with local data.');
+    _done();
+  }, 10000);
+
+  _db.collection('bartracKE').doc('data').get()
+    .then(function(doc){
+      if(doc.exists){
+        try{
+          const saved = JSON.parse(doc.data().payload);
+          if(_applyLoadedData(saved)){
+            _lsSave(_buildPayload());
+            console.log('[BarTracKE] Data fully restored from Firestore ✅');
+          }
+        }catch(e){ console.warn('[BarTracKE] Restore parse error:', e); }
+      } else {
+        console.log('[BarTracKE] No Firestore document yet — keeping seed data.');
+      }
+      _done();
+    })
+    .catch(function(e){
+      console.warn('[BarTracKE] Firestore restore failed:', e.message);
+      _done();
+    });
+}
+
+// Register PWA Service Worker
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js")
+      .then(function(r){ console.log("[BarTracKE PWA] SW registered:", r.scope); })
+      .catch(function(e){ console.log("[BarTracKE PWA] SW failed:", e); });
+  });
+}
+
+// Save data before user leaves the app (only when logged in)
+window.addEventListener("beforeunload", function(){ if(SESSION.user) saveDB(); });
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden" && SESSION.user) saveDB();
+});
+
+renderSplashBranches();
+</script>
+</body>
+</html>
+
+
